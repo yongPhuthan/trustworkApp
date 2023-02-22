@@ -2,7 +2,7 @@ import React, {createContext, useReducer} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import * as contrains from './Constrains';
-import { serviceList } from 'redux/Actions';
+import {serviceList} from 'redux/Actions';
 
 export type StateType = {
   docCounter: number;
@@ -13,7 +13,17 @@ export type StateType = {
   client_tel: string;
   client_tax: string;
   client_address: string;
-  serviceList: [];
+  serviceList: [
+    {
+      id: string;
+      title: string;
+      description: string;
+      unitPrice: string;
+      qty: string;
+      discountPercent: string;
+      total: string;
+    },
+  ];
 };
 
 type ActionType = {
@@ -50,7 +60,7 @@ const initialState: StateType = {
   client_tax: 'null',
   client_tel: 'null',
   client_address: 'null',
-  serviceList: []
+  serviceList: [],
   // serviceList: [
   //   {
   //     id: null,
@@ -63,7 +73,6 @@ const initialState: StateType = {
   //     total: 0,
   //   },
   // ],
-  
 };
 
 function reducer(state: StateType, action: ActionType): StateType {
@@ -84,12 +93,15 @@ function reducer(state: StateType, action: ActionType): StateType {
       return {...state, client_address: action.payload as string};
     case contrains.CLIENT_TAX:
       return {...state, client_tax: action.payload as string};
-      case contrains.ADD_SERVICES_LIST:
-      return { ...state, serviceList: [...state.serviceList, action.payload ] as any};
+    case contrains.ADD_SERVICES_LIST:
+      return {
+        ...state,
+        serviceList: [...state.serviceList, action.payload] as any,
+      };
 
-      case contrains.START_SERVICE_LIST:
-        return { ...state, serviceList: action.payload as any};
-      
+    case contrains.START_SERVICE_LIST:
+      return {...state, serviceList: action.payload as any};
+
     default:
       return state;
   }

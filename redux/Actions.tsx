@@ -1,5 +1,6 @@
 import * as contrains from './Constrains';
 
+
 // ACTION => REDUCER
 
 export const all_data = (payload: any) => ({
@@ -270,7 +271,9 @@ export const clientVat = (payload: string) => {
     dispatch(client_tax(payload));
   };
 };
-export const serviceList = (payload: object[]) => {
+export const serviceList = (payload: object[
+  
+]) => {
   return (dispatch: any) => {
     dispatch(service_list(payload));
   };

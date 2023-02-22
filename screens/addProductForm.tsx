@@ -3,7 +3,7 @@ import {
   View,
   TextInput,
   Text,
-  Button,
+  Platform,
   Dimensions,
   StyleSheet,
   TouchableOpacity,
@@ -66,24 +66,19 @@ const AddProductForm = ({navigation}: Props) => {
   }: any = useContext(Store);
 
   const handleFormSubmit = (data: FormData) => {
-    // Send form data to backend API to add client
-    data.qty = qty.toString();
-    data.total = total.toString();
-    data.id = uuidv4();
-    //     id: null,
-    //     title: null,
-    //     description: '',
-    //     unitPrice: null,
-    //     qty: null,
-    //     discountPercent: null,
-    //     discountTHB: null,
-    //     total: 0,
-    const newService = [data];
-    const newServiceList = [...serviceList, data]; // create new array with the new service data
+   
+    const newServiceItem = {
+      id: uuidv4(), // generate a unique ID for the new item
+      title: data.title,
+      description: data.description,
+      unitPrice: data.unitPrice,
+      qty: data.qty,
+      discountPercent: data.discountPercent,
+      total: (qty * unitPrice).toString(),
+    };
+    dispatch(stateAction.service_list(newServiceItem as any))
+    console.log('serviceList'+ JSON.stringify(serviceList));
 
-    dispatch(stateAction.service_list(newServiceList));
-
-    console.log('serviceList'+ JSON.stringify(newServiceList));
     navigation.goBack();
   };
 
@@ -273,7 +268,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 5,
-    paddingVertical: 13,
+    paddingVertical: 12,
     paddingHorizontal: 32,
     marginTop: 40,
     backgroundColor: '#0073BA',
@@ -327,7 +322,16 @@ const styles = StyleSheet.create({
   summary: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 10,
+    ...Platform.select({
+      ios: {
+        paddingVertical: 10,
+     
+      },
+      android: {
+        paddingVertical: 0,
+       
+      },
+    }),
   },
   priceSummary: {
     fontSize: 18,

@@ -59,6 +59,9 @@ const Quotation = ({navigation}: Props) => {
     dispatch,
   }: any = useContext(Store);
   const [showAddClient, setShowAddClient] = useState(true);
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [allDiscount, setAllDiscount] = useState(0);
+
   const [customerName, setCustomerName] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
   const [invoiceNumber, setInvoiceNumber] = useState('');
@@ -66,6 +69,13 @@ const Quotation = ({navigation}: Props) => {
 
   const handleCustomerNameChange = (value: string) => {
     setCustomerName(value);
+  };
+  const calculateTotalPrice = () => {
+    let total = 0;
+    for (let i = 0; i < serviceList.length; i++) {
+      total += Number(serviceList[i].total);
+    }
+    setTotalPrice(total);
   };
 
   const handleAddClientForm = () => {
@@ -87,6 +97,9 @@ const Quotation = ({navigation}: Props) => {
   const handleDateSelected = (date: Date) => {
     console.log('Selected date:', date);
   };
+  useEffect(() => {
+    calculateTotalPrice();
+  }, [serviceList]);
   return (
     <View style={{flex: 1}}>
       <ScrollView style={styles.container}>
@@ -123,15 +136,14 @@ const Quotation = ({navigation}: Props) => {
             <Text style={styles.label}>บริการ-สินค้า</Text>
           </View>
 
-          {serviceList.map((item: any, index: number) =>
+          {serviceList.map((item: any, index: number) => (
             <CardProject serviceList={item} key={index} />
-
-          )}
+          ))}
 
           <AddServices handleAddProductFrom={handleAddProductForm} />
 
           <Divider />
-          <Summary title={'ยอดรวม'} price={2990000000.0} />
+          <Summary title={'ยอดรวม'} price={totalPrice} />
         </View>
       </ScrollView>
       <FooterBtn />
