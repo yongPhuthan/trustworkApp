@@ -11,26 +11,26 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import AddServices from './AddServices';
 import {Store} from '../redux/Store';
 
-
 type Props = {
   serviceList: {
-    title: string,
-    description: string,
-    unitPrice: string,
-    qty: string
-  }
+    title: string;
+    description: string;
+    unitPrice: string;
+    qty: string;
+  };
+  handleEditService: Function;
+
 };
 const windowWidth = Dimensions.get('window').width;
 
 const CardProject = (props: Props) => {
-  const { serviceList } = props;
-  console.log(props.serviceList);
-
+  const {serviceList} = props;
 
   return (
     <View>
-
-      <TouchableOpacity style={styles.subContainer}>
+      <TouchableOpacity
+        style={styles.subContainer}
+        onPress={()=>props.handleEditService()}>
         <View style={styles.summary}>
           <Text style={styles.summaryText}>{serviceList.title}</Text>
           <Text style={styles.summaryPrice}>{serviceList.unitPrice}</Text>

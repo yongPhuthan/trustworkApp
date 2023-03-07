@@ -2,6 +2,9 @@
   
   "compilerOptions": {
     "baseUrl": ".",
+    "typeRoots": ["node_modules/@types", "node_modules/firebase"],
+    "esModuleInterop": true,
+    "lib": ["esnext", "dom"],
     "paths": {
       "*": ["*", "src/types/*"]
     }

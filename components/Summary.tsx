@@ -9,19 +9,30 @@ import {
 } from 'react-native';
 import {Picker} from '@react-native-picker/picker';
 import ModalSelector from 'react-native-modal-selector';
-import React, {useState, useRef} from 'react';
+import React, {useState, useContext, useEffect, useRef} from 'react';
 import Divider from './styles/Divider';
+import {Store} from '../redux/Store';
+import * as stateAction from '../redux/Actions';
+
 
 type Props = {
   title: string;
   price: number;
+  onValuesChange: (
+    total: number,
+    discountValue: number,
+    sumAfterDiscount: number,
+    vat7Amount: number,
+    vat3Amount: number,
+  ) => void;
 };
 
 const windowWidth = Dimensions.get('window').width;
 
 const Summary = (props: Props) => {
+
   const [selectedLanguage, setSelectedLanguage] = useState();
-  const [selectedValue, setSelectedValue] = useState('item1');
+  const [selectedValue, setSelectedValue] = useState(0);
   const [pickerVisible, setPickerVisible] = useState(false);
   const [discount, setDiscount] = useState('0');
   const [vat7, setVat7] = useState(false);
@@ -43,15 +54,27 @@ const Summary = (props: Props) => {
     pickerRef.current.blur();
   }
   const data = [
-    {key: 'item1', label: 'Item 1'},
-    {key: 'item2', label: 'Item 2'},
-    {key: 'item3', label: 'Item 3'},
+    {key: '3', label: '3%'},
+    {key: '5', label: '5%'},
   ];
   const discountValue = (props.price * parseFloat(discount)) / 100;
   const sumAfterDiscount = props.price - discountValue;
   const vat7Amount = vat7 ? sumAfterDiscount * 0.07 : 0;
-  const total = Number(sumAfterDiscount + vat7Amount);
-  return (
+  const vat3Amount = pickerVisible
+    ? (sumAfterDiscount * Number(selectedValue)) / 100
+    : 0;
+    const total = Number(sumAfterDiscount + vat7Amount - vat3Amount);
+    useEffect(() => {
+      props.onValuesChange(
+        total,
+        discountValue,
+        sumAfterDiscount,
+        vat7Amount,
+        vat3Amount,
+      );
+    }, [total, discountValue, sumAfterDiscount, vat7Amount, vat3Amount]);
+
+    return (
     <View style={styles.container}>
       <View style={styles.summary}>
         <Text style={styles.summaryText}>{props.title}</Text>
@@ -89,8 +112,8 @@ const Summary = (props: Props) => {
       {/* summary after discount */}
 
       {/* vat 3  */}
-      <View style={styles.summaryTax}>
-        <Text style={styles.summaryTaxVat}>หัก ณ ที่จ่าย</Text>
+      <View style={styles.summary}>
+        <Text style={styles.summaryTaxVat}>VAT 3%</Text>
         <Switch
           trackColor={{false: '#767577', true: '#81b0ff'}}
           thumbColor={pickerVisible ? '#ffffff' : '#f4f3f4'}
@@ -106,28 +129,23 @@ const Summary = (props: Props) => {
             },
           })}
         />
-        {pickerVisible ? (
-          <ModalSelector
-            data={data}
-            endFillColor={'black'}
-            style={styles.summarySelecter}
-            initValue={selectedValue}
-            onChange={option => setSelectedValue(option.key)}></ModalSelector>
-        ) : (
-          <Text
-            style={Platform.select({
-              ios: {
-                fontSize: 18,
-              },
-              android: {
-                fontSize: 18,
-                marginVertical: 10,
-              },
-            })}>
-            ไม่มี
-          </Text>
+        {pickerVisible && (
+          <View style={styles.pickerContainer}>
+            <Picker
+              style={styles.picker}
+              selectedValue={selectedValue}
+              onValueChange={(itemValue, itemIndex) =>
+                setSelectedValue(itemValue)
+              }>
+              <Picker.Item label="0%" value={0} />
+              <Picker.Item label="3%" value={3} />
+              <Picker.Item label="5%" value={5} />
+            </Picker>
+          </View>
         )}
+        <Text style={styles.summaryText}>{vat3Amount.toFixed(2)}</Text>
       </View>
+
       {/* end vat3 */}
 
       {/* vat 7 */}
@@ -204,7 +222,6 @@ const styles = StyleSheet.create({
   summaryTaxVat: {
     fontSize: 16,
     marginVertical: 10,
-    width: '40%',
   },
   totalSummary: {
     fontSize: 20,
@@ -217,6 +234,14 @@ const styles = StyleSheet.create({
   },
   textSwtich: {
     fontSize: 18,
+  },
+  pickerContainer: {
+    flex: 1,
+ 
+    height: 40,
+  },
+  picker: {
+    flex: 1,
   },
   summarySelecter: {
     fontSize: 18,
@@ -241,7 +266,6 @@ const styles = StyleSheet.create({
 
   input: {
     flex: 1,
-
     paddingHorizontal: 10,
     paddingVertical: 5,
     fontSize: 16,

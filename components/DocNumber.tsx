@@ -45,6 +45,6 @@ const styles = StyleSheet.create({
   input: {
     justifyContent: 'flex-end',
 
-    fontSize: 16,
+    fontSize: 14,
   },
 });

@@ -10,14 +10,7 @@ import {
 import {Store} from '../redux/Store';
 import * as stateAction from '../redux/Actions';
 import {StackNavigationProp} from '@react-navigation/stack';
-import {RouteProp} from '@react-navigation/native';
-
-type RootStackParamList = {
-  Quotation: undefined;
-  เพิ่มลูกค้า: undefined;
-  เพิ่มรายการ: undefined;
-  // Profile: { userId: string };
-};
+import {RouteProp, ParamListBase} from '@react-navigation/native';
 
 type FormValues = {
   name: string;
@@ -25,16 +18,13 @@ type FormValues = {
   phone: string;
   taxId: string;
 };
-type HomeScreenNavigationProp = StackNavigationProp<
-  RootStackParamList,
-  'Quotation'
->;
-type Props = {
-  navigation: HomeScreenNavigationProp;
-  route: RouteProp<RootStackParamList, 'Quotation'>;
-};
 
-const AddClientForm = ({navigation}: Props) => {
+interface Props {
+  navigation: StackNavigationProp<ParamListBase, 'AddClient'>;
+  route: RouteProp<ParamListBase, 'AddClient'>;
+}
+
+const AddClientForm = ({navigation, route}: Props) => {
   const {
     state: {client_name},
     dispatch,

@@ -1,23 +1,38 @@
-import React, {useState} from 'react';
+import React, {useState, useContext, useEffect} from 'react';
 import {View, Text, Image, StyleSheet} from 'react-native';
 import {Checkbox} from 'react-native-paper';
-
+import {Store} from '../redux/Store';
 type CardProps = {
   title: string;
   description: string;
   price: number;
   imageUri: string;
+  onPress: Function;
+  defaultChecked: boolean;
 };
 
-const CardAudit = ({title, description, price, imageUri}: CardProps) => {
-  const [checked, setChecked] = useState(false);
+const CardAudit = ({
+  title,
+  description,
+  price,
+  imageUri,
+  onPress,
+  defaultChecked,
+}: CardProps) => {
+  const {
+    state: {selectedAudit},
+  }: any = useContext(Store);
+  const [checked, setChecked] = useState(defaultChecked);
 
   const handleCheckbox = () => {
     setChecked(!checked);
+    onPress();
   };
-
+  useEffect(() => {
+    setChecked(defaultChecked);
+  }, [defaultChecked]);
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, checked && styles.selected]}>
       <View style={styles.checkboxContainer}>
         <Checkbox
           status={checked ? 'checked' : 'unchecked'}
@@ -28,6 +43,8 @@ const CardAudit = ({title, description, price, imageUri}: CardProps) => {
       <View style={styles.textContainer}>
         <View style={styles.titleContainer}>
           <Text style={styles.title}>{title}</Text>
+          <Text style={styles.title}>{defaultChecked.toString()}</Text>
+
           <Text style={styles.price}>{price}</Text>
         </View>
         <View style={styles.underline} />
@@ -38,6 +55,7 @@ const CardAudit = ({title, description, price, imageUri}: CardProps) => {
     </View>
   );
 };
+export default CardAudit;
 
 const styles = StyleSheet.create({
   container: {
@@ -55,6 +73,9 @@ const styles = StyleSheet.create({
     shadowRadius: 2.22,
     elevation: 3,
   },
+  selected: {
+    backgroundColor: '#F2F2F2',
+  },
   checkboxContainer: {
     justifyContent: 'flex-start',
     alignItems: 'flex-start',
@@ -68,7 +89,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   image: {
-
     width: 250,
     height: 250,
   },
@@ -100,5 +120,3 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
 });
-
-export default CardAudit;

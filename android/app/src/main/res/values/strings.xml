@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Trustwork</string>
+    <string name="facebook_app_id">517232930599364</string><string name="facebook_client_token">d00700c159934138359b0f77c16edbbd</string>
+
 </resources>

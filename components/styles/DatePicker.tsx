@@ -31,6 +31,8 @@ const DatePickerButton: React.FC<DatePickerButtonProps> = ({
       setSelectedDate(date);
       onDateSelected(date);
     }
+
+    
   };
 
   return (

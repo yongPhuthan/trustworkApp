@@ -2,7 +2,7 @@ import React, {createContext, useReducer} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import * as contrains from './Constrains';
-import {serviceList} from 'redux/Actions';
+import {serviceList, selectedContract} from 'redux/Actions';
 
 export type StateType = {
   docCounter: number;
@@ -13,17 +13,11 @@ export type StateType = {
   client_tel: string;
   client_tax: string;
   client_address: string;
-  serviceList: [
-    {
-      id: string;
-      title: string;
-      description: string;
-      unitPrice: string;
-      qty: string;
-      discountPercent: string;
-      total: string;
-    },
-  ];
+  serviceList: [];
+  selectedAudit: [];
+  selectedContract: [];
+
+  allTotal: number;
 };
 
 type ActionType = {
@@ -47,6 +41,9 @@ export const Store = createContext<ContextType>({
     client_tel: 'null',
     client_address: 'null',
     serviceList: [],
+    selectedAudit: [],
+    selectedContract: [],
+    allTotal: 0,
   },
   dispatch: () => {},
 });
@@ -61,18 +58,9 @@ const initialState: StateType = {
   client_tel: 'null',
   client_address: 'null',
   serviceList: [],
-  // serviceList: [
-  //   {
-  //     id: null,
-  //     title: null,
-  //     description: '',
-  //     unitPrice: null,
-  //     qty: null,
-  //     discountPercent: null,
-  //     discountTHB: null,
-  //     total: 0,
-  //   },
-  // ],
+  selectedAudit: [],
+  selectedContract: [],
+  allTotal: 0,
 };
 
 function reducer(state: StateType, action: ActionType): StateType {
@@ -99,8 +87,47 @@ function reducer(state: StateType, action: ActionType): StateType {
         serviceList: [...state.serviceList, action.payload] as any,
       };
 
+    case contrains.UPDATE_SERVICE_LIST:
+      return {
+        ...state,
+        serviceList: action.payload as any,
+      };
+
+    case contrains.SELECTED_AUDIT:
+      return {
+        ...state,
+        selectedAudit: [...state.selectedAudit, action.payload] as any,
+      };
+    case contrains.REMOVE_SELECTED_AUDIT:
+      return {
+        ...state,
+        selectedAudit: state.selectedAudit.filter(
+          a => a.title !== action.payload.title,
+        ) as any,
+      };
+
+    case contrains.RESET_AUDIT:
+      return {...state, selectedAudit: []};
     case contrains.START_SERVICE_LIST:
       return {...state, serviceList: action.payload as any};
+    case contrains.ALLTOTAL:
+      return {...state, allTotal: action.payload as number};
+
+    case contrains.SELECTED_CONTRACT:
+      return {
+        ...state,
+        selectedAudit: [...state.selectedContract, action.payload] as any,
+      };
+    case contrains.REMOVE_SELECTED_CONTRACT:
+      return {
+        ...state,
+        selectedAudit: state.selectedContract.filter(
+          a => a.title !== action.payload.title,
+        ) as any,
+      };
+
+    case contrains.RESET_CONTRACT:
+      return {...state, selectedContract: []};
 
     default:
       return state;

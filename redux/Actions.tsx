@@ -1,10 +1,14 @@
 import * as contrains from './Constrains';
 
-
 // ACTION => REDUCER
 
 export const all_data = (payload: any) => ({
   type: contrains.ALL_DATA,
+  payload,
+});
+
+export const all_total = (payload: number) => ({
+  type: contrains.ALLTOTAL,
   payload,
 });
 
@@ -124,10 +128,44 @@ export const service_list = (payload: object[]) => ({
   payload,
 });
 
+export const update_service_list = (payload: object[]) => ({
+  type: contrains.UPDATE_SERVICE_LIST,
+  payload,
+});
+
+export const selected_audit = (payload: object) => ({
+  type: contrains.SELECTED_AUDIT,
+  payload,
+});
+
+export const reset_audit = () => ({
+  type: contrains.RESET_AUDIT,
+});
+
 export const start_service_list = (payload: object[]) => ({
   type: contrains.START_SERVICE_LIST,
   payload,
 });
+
+export const remove_selected_audit = (payload: object) => ({
+  type: contrains.REMOVE_SELECTED_AUDIT,
+  payload,
+});
+
+export const remove_selected_contract = (payload: object) => ({
+  type: contrains.REMOVE_SELECTED_CONTRACT,
+  payload,
+});
+
+export const selected_contract = (payload: object) => ({
+  type: contrains.SELECTED_CONTRACT,
+  payload,
+});
+
+export const reset_contract = () => ({
+  type: contrains.RESET_CONTRACT,
+});
+
 // COMPONENTS  => ACTION
 
 export const docCounter = (payload: number) => {
@@ -271,16 +309,59 @@ export const clientVat = (payload: string) => {
     dispatch(client_tax(payload));
   };
 };
-export const serviceList = (payload: object[
-  
-]) => {
+
+export const allTotal = (payload: number) => {
+  return (dispatch: any) => {
+    dispatch(all_total(payload));
+  };
+};
+
+export const serviceList = (payload: object[]) => {
   return (dispatch: any) => {
     dispatch(service_list(payload));
+  };
+};
+
+export const updateServiceList = (payload: object[]) => {
+  return (dispatch: any) => {
+    dispatch(update_service_list(payload));
   };
 };
 
 export const startServiceList = (payload: object[]) => {
   return (dispatch: any) => {
     dispatch(start_service_list(payload));
+  };
+};
+export const selectedAudit = (payload: object) => {
+  return (dispatch: any) => {
+    dispatch(selected_audit(payload));
+  };
+};
+export const removeSelectedAudit = (payload: object) => {
+  return (dispatch: any) => {
+    dispatch(remove_selected_audit(payload));
+  };
+};
+
+export const resetAudit = () => {
+  return (dispatch: any) => {
+    dispatch(reset_audit);
+  };
+};
+export const selectedContract = (payload: object) => {
+  return (dispatch: any) => {
+    dispatch(selected_contract(payload));
+  };
+};
+export const removeSelectedContract = (payload: object) => {
+  return (dispatch: any) => {
+    dispatch(remove_selected_contract(payload));
+  };
+};
+
+export const resetContract = () => {
+  return (dispatch: any) => {
+    dispatch(reset_contract);
   };
 };

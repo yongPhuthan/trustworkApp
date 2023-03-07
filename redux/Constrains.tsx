@@ -38,4 +38,19 @@ export const CLIENT_TAX = 'CLIENT_TAX';
 
 // AddService
 export const ADD_SERVICES_LIST = 'ADD_SERVICES_LIST';
+export const UPDATE_SERVICE_LIST = 'UPDATE_SERVICE_LIST';
+
 export const START_SERVICE_LIST = 'START_SERVICE_LIST';
+
+// Audit
+export const SELECTED_AUDIT = 'SELECTED_AUDIT';
+export const RESET_AUDIT = 'RESET_AUDIT';
+export const REMOVE_SELECTED_AUDIT = 'REMOVE_SELECTED_AUDIT';
+
+// Contract
+export const SELECTED_CONTRACT = 'SELECTED_CONTRACT';
+export const RESET_CONTRACT = 'RESET_CONTRACT';
+export const REMOVE_SELECTED_CONTRACT = 'REMOVE_SELECTED_CONTRACT';
+
+// summary
+export const ALLTOTAL = 'ALLTOTAL';

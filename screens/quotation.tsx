@@ -7,6 +7,8 @@ import {
   FlatList,
   TouchableOpacity,
 } from 'react-native';
+import axios from 'axios';
+import {v4 as uuidv4} from 'uuid';
 import React, {useState, useContext, useEffect, useRef} from 'react';
 import DocNumber from '../components/DocNumber';
 import AddClient from '../components/AddClient';
@@ -15,6 +17,7 @@ import Summary from '../components/Summary';
 import Divider from '../components/styles/Divider';
 import {NavigationContainer} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
+import firebase from '../firebase';
 import RootStack from '../navigations/RootStack';
 import Navigation from '../navigations/Navigation';
 import CardProject from '../components/CardProject';
@@ -25,21 +28,20 @@ import DatePickerButton from '../components/styles/DatePicker';
 import {Store} from '../redux/Store';
 import * as stateAction from '../redux/Actions';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import {useQuery} from 'react-query';
+import auth from '@react-native-firebase/auth';
 
 type RootStackParamList = {
   Quotation: undefined;
-  เพิ่มลูกค้า: undefined;
-  เพิ่มรายการ: undefined;
-  // Profile: { userId: string };
+  AddClient: undefined;
+  AddProductForm: undefined;
+  EditProductForm: undefined;
+  SignUpScreen: undefined;
+  SelectContract: undefined;
 };
 
-type HomeScreenNavigationProp = StackNavigationProp<
-  RootStackParamList,
-  'เพิ่มลูกค้า'
->;
-
 interface Props {
-  navigation: HomeScreenNavigationProp;
+  navigation: StackNavigationProp<RootStackParamList, 'Quotation'>;
 }
 
 interface ServiceItem {
@@ -47,26 +49,86 @@ interface ServiceItem {
   title: string | null;
   // add other properties if needed
 }
+interface CompanyUser {
+  id: string;
+  // other properties here
+}
 const thaiDateFormatter = new Intl.DateTimeFormat('th-TH', {
   year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-  weekday: 'long',
+  month: '2-digit',
+  day: '2-digit',
 });
+
+const fetchCompanyUser = async (email: string) => {
+  const user = auth().currentUser;
+  if (!user) {
+    throw new Error('User not authenticated');
+  }
+  const idToken = await user.getIdToken();
+
+  const response = await fetch(
+    `http://localhost:5001/workerfirebase-f1005/asia-southeast1/queryCompanySeller2`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${idToken}`,
+      },
+      body: JSON.stringify({email}),
+      credentials: 'include',
+    },
+  );
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error('Network response was not ok');
+  }
+
+  return data;
+  
+};
+
 const Quotation = ({navigation}: Props) => {
   const {
-    state: {client_name, serviceList},
+    state: {client_name,selectedContract, serviceList,client_address,client_tel,client_tax},
     dispatch,
   }: any = useContext(Store);
+  // const { data, isLoading } = useQuery('data', fetchData);
+  const [email, setEmail] = useState('');
+
   const [showAddClient, setShowAddClient] = useState(true);
   const [totalPrice, setTotalPrice] = useState(0);
   const [allDiscount, setAllDiscount] = useState(0);
-
+  const [status, setStatus] = useState('');
+  const [total, setTotal] = useState(0);
+  const [companyUser, setCompanyUser] = useState<CompanyUser>({id:''});
+  const [discountValue, setDiscountValue] = useState(0);
+  const [summaryAfterDiscount, setSumAfterDiscount] = useState(0);
+  const [vat7Amount, setVat7Amount] = useState(0);
+  const [vat3Amount, setVat3Amount] = useState(0);
   const [customerName, setCustomerName] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
-  const [invoiceNumber, setInvoiceNumber] = useState('');
+  const [docNumber, setDocnumber] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const [dateOffer, setDateOffer] = useState<String>('');
+  const [dateEnd, setDateEnd] = useState<String>('');
 
+  const [discount, setDiscount] = useState('0');
+  const [vat7, setVat7] = useState(false);
+
+  const handleValuesChange = (
+    total: number,
+    discountValue: number,
+    sumAfterDiscount: number,
+    vat7Amount: number,
+    vat3Amount: number,
+  ) => {
+    setTotal(total);
+    setDiscountValue(discountValue);
+    setSumAfterDiscount(sumAfterDiscount);
+    setVat7Amount(vat7Amount);
+    setVat3Amount(vat3Amount);
+  };
   const handleCustomerNameChange = (value: string) => {
     setCustomerName(value);
   };
@@ -77,46 +139,137 @@ const Quotation = ({navigation}: Props) => {
     }
     setTotalPrice(total);
   };
-
+  const checkConnection = async () => {
+    try {
+      const response = await fetch('http://10.0.2.2:3000/check-connection');
+      const data = await response.text();
+      setStatus(data);
+    } catch (err) {
+      console.error('Error checking connection', err);
+      setStatus('Error checking connection');
+    }
+  };
   const handleAddClientForm = () => {
     // TODO: Add client to quotation
-    navigation.navigate('เพิ่มลูกค้า');
+    navigation.navigate('AddClient');
   };
 
   const handleAddProductForm = () => {
     // TODO: Add client to quotation
-    navigation.navigate('เพิ่มรายการ');
+    navigation.navigate('AddProductForm');
   };
-
+  const handleEditService = (index: number) => {
+    navigation.navigate('EditProductForm', {item: serviceList[index]});
+  };
   const handleCustomerAddressChange = (value: string) => {
     setCustomerAddress(value);
   };
+  const handleButtonPress = async () => {
+    const clientData = {
+      id: uuidv4(),
+      name: client_name,
+      address: client_address,
+      companyId: client_tax,
+      officePhone: client_tel,
+      mobilePhone: client_tel,
+    }
+    const apiData = {
+      data: {
+        id: uuidv4(),
+        summary: totalPrice,
+        services: serviceList,
+        customer: clientData,
+        vat7: vat7Amount,
+        taxValue: vat3Amount,
+        taxName: 'vat3',
+        dateEnd,
+        discountValue,
+        discountName: 'percent',
+        dateOffer,
+        docNumber,
+        summaryAfterDiscount,
+        allTotal: totalPrice,
+        sellerSignature: '',
+        conditions: [],
+        userId: companyUser?.id ,
+      },
+    };
+    console.log('apiData'+ JSON.stringify(apiData));
+  };
+
   const handleInvoiceNumberChange = (text: string) => {
-    setInvoiceNumber(text);
+    setDocnumber(text);
   };
-  const handleDateSelected = (date: Date) => {
-    console.log('Selected date:', date);
+
+  const handleSelectContract = () => {
+    navigation.navigate('SelectContract');
   };
+  const handleStartDateSelected = (date: Date) => {
+    const formattedDate = thaiDateFormatter.format(date);
+    setDateOffer(formattedDate);
+    console.log(dateOffer);
+  };
+
+  const handleEndDateSelected = (date: Date) => {
+    const formattedEndDate = thaiDateFormatter.format(date);
+
+    setDateEnd(formattedEndDate);
+  };
+
   useEffect(() => {
+    const unsubscribe = auth().onAuthStateChanged(user => {
+      if (user && user.email) {
+        // User is authenticated, show their email
+        console.log('User is authenticated:', user.email);
+        setEmail(user.email);
+      } else {
+        // User is not authenticated, navigate to login page
+        console.log('User is not authenticated, navigating to login page...');
+        navigation.navigate('SignUpScreen');
+      }
+    });
+
     calculateTotalPrice();
-  }, [serviceList]);
+
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const randomNum = Math.floor(Math.random() * 900) + 100; // generates a random 3-digit number
+    setDocnumber(`${year}${month}${day}${randomNum}`);
+
+    return unsubscribe;
+  }, [serviceList, navigation]);
+  const {data, isLoading, isError} = useQuery(
+    ['companyUser', email],
+    () => fetchCompanyUser(email).then(res => res),
+    {
+      onSuccess: data => {
+        setCompanyUser(data)
+      },
+    },
+  );
+  if (isLoading) {
+    return <Text>LOADING ........</Text>;
+  }
+
   return (
     <View style={{flex: 1}}>
       <ScrollView style={styles.container}>
         <View style={styles.subContainerHead}>
           <DatePickerButton
             label="วันที่เสนอราคา"
-            onDateSelected={handleDateSelected}
+            onDateSelected={handleStartDateSelected}
           />
 
           <DocNumber
             label="เลขที่เอกสาร"
             onChange={handleInvoiceNumberChange}
-            value={invoiceNumber}
+            value={docNumber}
           />
           <DatePickerButton
             label="ยืนราคาถึงวันที่ี"
-            onDateSelected={handleDateSelected}
+            onDateSelected={handleEndDateSelected}
           />
         </View>
         <View style={styles.subContainer}>
@@ -135,18 +288,51 @@ const Quotation = ({navigation}: Props) => {
 
             <Text style={styles.label}>บริการ-สินค้า</Text>
           </View>
-
           {serviceList.map((item: any, index: number) => (
-            <CardProject serviceList={item} key={index} />
+            <CardProject
+              handleEditService={() => handleEditService(index)}
+              serviceList={item}
+              key={index}
+            />
           ))}
 
           <AddServices handleAddProductFrom={handleAddProductForm} />
 
           <Divider />
-          <Summary title={'ยอดรวม'} price={totalPrice} />
+          <Summary
+            title={'ยอดรวม'}
+            price={totalPrice}
+            onValuesChange={handleValuesChange}
+          />
         </View>
+        {selectedContract.length > 0 ? (
+            <View style={styles.cardContainer}>
+              {selectedContract.map((item)  => (
+                <TouchableOpacity
+                  key={item.id}
+                  style={styles.card}
+                  onPress={handleSelectContract}>
+                  <Text style={styles.cardTitle}>{item.title}</Text>
+                  <Icon name="chevron-right" size={24} color="gray" />
+                </TouchableOpacity>
+              ))} 
+            </View>
+          ) : (
+            <View style={styles.subContainer}>
+              {selectedContract.length === 0 && (
+                <TouchableOpacity
+                style={styles.selectButton}
+                onPress={(handleSelectContract)}>
+                <Text style={styles.selectButtonText}>Select Audit</Text>
+              </TouchableOpacity>
+              )}
+            </View>
+          )}
+ 
       </ScrollView>
-      <FooterBtn />
+      <View>
+        <FooterBtn onPress={handleButtonPress} />
+      </View>
     </View>
   );
 };
@@ -215,5 +401,40 @@ const styles = StyleSheet.create({
     marginTop: 40,
     alignItems: 'flex-start',
     justifyContent: 'flex-start',
+  },
+  selectButton: {
+    backgroundColor: '#0073BA',
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 5,
+    marginTop: 20,
+  },
+  selectButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  cardContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+  },
+
+  card: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    padding: 10,
+    flexDirection: 'row',
+    width: '100%',
+    marginBottom: 10,
+    justifyContent: 'space-between',
+
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });

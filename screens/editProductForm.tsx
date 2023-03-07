@@ -40,13 +40,14 @@ type ServiceList = {
 };
 
 type Props = {
-  navigation: StackNavigationProp<ParamListBase, 'AddProductForm'>;
-  route: RouteProp<ParamListBase, 'AddProductForm'>;
+  navigation: StackNavigationProp<ParamListBase, 'EditProductForm'>;
+  route: RouteProp<ParamListBase, 'EditProductForm'>;
 };
 
-const AddProductForm = ({navigation, route}: Props) => {
+const EditProductForm = ({navigation, route}: Props) => {
   const {control, handleSubmit} = useForm<FormData>();
-  const [qty, setQuantity] = useState(1);
+  const {item} = route.params;
+  const [qty, setQuantity] = useState(0);
   const [count, setCount] = useState(0);
   const [unitPrice, setPrice] = useState(0);
   const [total, setTotalCost] = useState(0);
@@ -59,27 +60,64 @@ const AddProductForm = ({navigation, route}: Props) => {
 
   const handleFormSubmit = (data: FormData) => {
     const newServiceItem = {
-      id: uuidv4(), // generate a unique ID for the new item
-      title: data.title,
-      description: data.description,
-      unitPrice: data.unitPrice,
-      qty: data.qty,
-      discountPercent: data.discountPercent,
+      id: item.id, // generate a unique ID for the new item
+      title: data.title ? data.title : item.title,
+      description: data.description ? data.description : item.description,
+      unitPrice: data.unitPrice ? data.unitPrice : item.unitPrice,
+      qty: data.qty ? data.qty : item.qty,
+      discountPercent: data.discountPercent
+        ? data.discountPercent
+        : item.discountPercent,
       total: (qty * unitPrice).toString(),
-      audits:selectedAudit
     };
-    dispatch(stateAction.service_list(newServiceItem as any));
-    dispatch(stateAction.reset_audit());
-    console.log('serviceList' + (serviceList));
+
+    // Find the index of the item in the serviceList array
+    const index = serviceList.findIndex(
+      (serviceItem: any) => serviceItem.id === item.id,
+    );
+
+    if (index !== -1) {
+      // Update the values of the item in the serviceList array
+      const updatedServiceList = [...serviceList];
+      updatedServiceList[index] = {
+        ...updatedServiceList[index],
+        ...newServiceItem,
+      };
+
+      // Dispatch the action to update the serviceList state
+      dispatch(stateAction.update_service_list(updatedServiceList));
+    }
 
     navigation.goBack();
   };
+
+  const handleDelete = () => {
+    // Find the index of the item in the serviceList array
+    const index = serviceList.findIndex(
+      (serviceItem: any) => serviceItem.id === item.id,
+    );
+
+    if (index !== -1) {
+      // Remove the item from the serviceList array
+      const updatedServiceList = [...serviceList];
+      updatedServiceList.splice(index, 1);
+
+      // Dispatch the action to update the serviceList state
+      dispatch(stateAction.update_service_list(updatedServiceList));
+
+      // Navigate back to the previous screen
+      navigation.goBack();
+    }
+  };
+
   const handleSelectAudit = (data: FormData) => {
     navigation.navigate('SelectAudit', {
       title: data.title,
       description: data.description,
     });
   };
+  console.log('item' + JSON.stringify(item.audits))
+
   useEffect(() => {
     // Calculate the total cost based on the quantity and price values
     setTotalCost(qty * unitPrice);
@@ -90,7 +128,7 @@ const AddProductForm = ({navigation, route}: Props) => {
         <Controller
           control={control}
           name="title"
-          defaultValue=""
+          defaultValue={item.title}
           render={({field: {onChange, value}}) => (
             <TextInput
               placeholder="ชื่อสินค้า-บริการ.."
@@ -103,7 +141,7 @@ const AddProductForm = ({navigation, route}: Props) => {
         <Controller
           control={control}
           name="description"
-          defaultValue=""
+          defaultValue={item.description}
           render={({field: {onChange, value}}) => (
             <TextInput
               placeholder="รายละเอียด..."
@@ -123,7 +161,7 @@ const AddProductForm = ({navigation, route}: Props) => {
           <Controller
             control={control}
             name="unitPrice"
-            defaultValue=""
+            defaultValue={item.unitPrice}
             render={({field: {onChange, value}}) => (
               <TextInput
                 style={styles.price}
@@ -156,11 +194,11 @@ const AddProductForm = ({navigation, route}: Props) => {
             <Controller
               control={control}
               name="qty"
-              defaultValue='10'
+              defaultValue={item.qty}
               render={({field: {onChange, value}}) => (
                 <TextInput
                   style={styles.counter}
-                  placeholder="10"
+                  placeholder="0"
                   keyboardType="number-pad"
                   onChangeText={value => {
                     onChange(value);
@@ -187,11 +225,12 @@ const AddProductForm = ({navigation, route}: Props) => {
           <Controller
             control={control}
             name="unit"
-            defaultValue="ชุด"
+            defaultValue={item.unit }
             render={({field: {onChange, value}}) => (
               <TextInput
                 style={styles.price}
-                keyboardType="default"
+                placeholder="ชุด"
+                keyboardType="number-pad"
                 onChangeText={onChange}
                 value={value}
               />
@@ -203,7 +242,7 @@ const AddProductForm = ({navigation, route}: Props) => {
           <Controller
             control={control}
             name="discountPercent"
-            defaultValue=""
+            defaultValue={item.discountPercent}
             render={({field: {onChange, value}}) => (
               <TextInput
                 style={styles.price}
@@ -221,7 +260,7 @@ const AddProductForm = ({navigation, route}: Props) => {
           <Controller
             control={control}
             name="total"
-            defaultValue=""
+            defaultValue={item.total}
             render={({field: {value}}) => (
               <TextInput
                 style={styles.priceSummary}
@@ -235,14 +274,14 @@ const AddProductForm = ({navigation, route}: Props) => {
         </View>
         <View></View>
         <View>
-          {selectedAudit.length > 0 ? (
+          {item.audits.length > 0 ? (
             <View style={styles.cardContainer}>
-              {selectedAudit.map(item  => (
+              {item.audits.map(audit => (
                 <TouchableOpacity
-                  key={item.id}
+                  key={audit.id}
                   style={styles.card}
                   onPress={handleSubmit(handleSelectAudit)}>
-                  <Text style={styles.cardTitle}>{item.title}</Text>
+                  <Text style={styles.cardTitle}>{audit.title}</Text>
                   <Icon name="chevron-right" size={24} color="gray" />
                 </TouchableOpacity>
               ))}
@@ -265,11 +304,17 @@ const AddProductForm = ({navigation, route}: Props) => {
           onPress={handleSubmit(handleFormSubmit)}>
           <Text style={styles.label}>บันทึก</Text>
         </TouchableOpacity>
+        <View style={styles.rowContainer}>
+          <TouchableOpacity style={styles.buttonContainer} onPress={handleDelete}>
+            <Icon name="close" size={24} color="red" />
+            <Text style={styles.buttonLabel}>ลบโครงการนี้</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </ScrollView>
   );
 };
-export default AddProductForm;
+export default EditProductForm;
 
 const styles = StyleSheet.create({
   container: {},
@@ -378,6 +423,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 5,
   },
+  rowContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderRadius: 5,
+    borderColor: 'red',
+    padding: 10,
+    width: '100%',
+  },
+  buttonLabel: {
+    marginLeft: 8,
+    fontSize: 16,
+  },
   selectButton: {
     backgroundColor: '#0073BA',
     paddingVertical: 12,
@@ -422,7 +486,6 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: 10,
     justifyContent: 'space-between',
-
   },
   cardTitle: {
     fontSize: 16,
