@@ -51,22 +51,28 @@ const AddProductForm = ({navigation, route}: Props) => {
   const [unitPrice, setPrice] = useState(0);
   const [total, setTotalCost] = useState(0);
   const [serviceListState, setServiceList] = useState<ServiceList[]>([]);
-
+const serviceID = uuidv4()
   const {
     state: {serviceList, selectedAudit},
     dispatch,
   }: any = useContext(Store);
 
   const handleFormSubmit = (data: FormData) => {
+    const selectedAudits = selectedAudit.map((obj:any) => {
+      return {
+        ...obj,
+        serviceID,
+      };
+    });
     const newServiceItem = {
-      id: uuidv4(), // generate a unique ID for the new item
+      id: serviceID, 
       title: data.title,
       description: data.description,
       unitPrice: data.unitPrice,
       qty: data.qty,
       discountPercent: data.discountPercent,
       total: (qty * unitPrice).toString(),
-      audits:selectedAudit
+      audits:selectedAudits
     };
     dispatch(stateAction.service_list(newServiceItem as any));
     dispatch(stateAction.reset_audit());
@@ -78,6 +84,8 @@ const AddProductForm = ({navigation, route}: Props) => {
     navigation.navigate('SelectAudit', {
       title: data.title,
       description: data.description,
+      serviceID: serviceID,
+      
     });
   };
   useEffect(() => {
@@ -235,9 +243,9 @@ const AddProductForm = ({navigation, route}: Props) => {
         </View>
         <View></View>
         <View>
-          {selectedAudit.length > 0 ? (
+          {selectedAudit?.length > 0 ? (
             <View style={styles.cardContainer}>
-              {selectedAudit.map(item  => (
+              {selectedAudit?.map((item:any)  => (
                 <TouchableOpacity
                   key={item.id}
                   style={styles.card}

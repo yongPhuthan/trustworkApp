@@ -39,7 +39,7 @@ export const CLIENT_TAX = 'CLIENT_TAX';
 // AddService
 export const ADD_SERVICES_LIST = 'ADD_SERVICES_LIST';
 export const UPDATE_SERVICE_LIST = 'UPDATE_SERVICE_LIST';
-
+export const RESET_SERVICE_LIST = 'RESET_SERVICE_LIST';
 export const START_SERVICE_LIST = 'START_SERVICE_LIST';
 
 // Audit

@@ -1,26 +1,42 @@
-import { StyleSheet, Dimensions, Text, View, Touchable, TouchableOpacity } from 'react-native';
+import {
+  StyleSheet,
+  Dimensions,
+  Text,
+  View,
+  Touchable,
+  TouchableOpacity,
+} from 'react-native';
 import React from 'react';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-type Props = {};
+type Props = {
+  customerName: string;
+  price: number;
+  unit: string;
+  description: string;
+  date: string;
+};
 const windowWidth = Dimensions.get('window').width;
 
 const CardDashBoard = (props: Props) => {
   return (
     <TouchableOpacity style={styles.subContainer}>
       <View style={styles.summary}>
-        <Text style={styles.summaryText}>คุณ ภูฐาน คันธบุษบง</Text>
-        <Text style={styles.summaryPrice}>30,000 บาท</Text>
-        <Icon style={styles.icon} name="chevron-right" size={26} color="#19232e" />
-
+        <Text style={styles.summaryText}>{props.customerName}</Text>
+        <Text style={styles.summaryPrice}>{props.price}บาท</Text>
+        <Icon
+          style={styles.icon}
+          name="chevron-right"
+          size={26}
+          color="#19232e"
+        />
       </View>
-      <View style={styles.description}>
-
-      </View>
+      {/* <View style={styles.description}>
+        <Text>{props.description}</Text>
+      </View> */}
       <View style={styles.telAndTax}>
-        <Text >วันที่ 13/2/2023</Text>
-        {/* <Text >1100800667422</Text> */}
-
+        <Text>วันที่ {props.date}</Text>
+        <Text>สิ้นสุด {props.date}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -40,11 +56,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 15,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.05,
     shadowRadius: 3.84,
     elevation: 5,
-    
   },
   summary: {
     flexDirection: 'row',
@@ -53,21 +68,18 @@ const styles = StyleSheet.create({
   description: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-
   },
-telAndTax: {
+  telAndTax: {
     flexDirection: 'row',
+    width:'90%',
     justifyContent: 'space-between',
     marginTop: 10,
-
   },
   unitPrice: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: windowWidth * 0.2,
     marginTop: 10,
-
-
   },
   subummary: {
     flexDirection: 'row',
@@ -75,14 +87,13 @@ telAndTax: {
   },
   summaryText: {
     fontSize: 16,
-    width: '60%'
-   
+    width: '60%',
   },
   summaryPrice: {
     fontSize: 18,
-    width: '30%'
+    width: '30%',
   },
   icon: {
-    width: '10%'
+    width: '10%',
   },
 });

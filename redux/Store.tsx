@@ -93,6 +93,9 @@ function reducer(state: StateType, action: ActionType): StateType {
         serviceList: action.payload as any,
       };
 
+      case contrains.RESET_SERVICE_LIST:
+        return {...state, serviceList: []};
+
     case contrains.SELECTED_AUDIT:
       return {
         ...state,
@@ -116,12 +119,12 @@ function reducer(state: StateType, action: ActionType): StateType {
     case contrains.SELECTED_CONTRACT:
       return {
         ...state,
-        selectedAudit: [...state.selectedContract, action.payload] as any,
+        selectedContract: [...state.selectedContract, action.payload] as any,
       };
     case contrains.REMOVE_SELECTED_CONTRACT:
       return {
         ...state,
-        selectedAudit: state.selectedContract.filter(
+        selectedContract: state.selectedContract.filter(
           a => a.title !== action.payload.title,
         ) as any,
       };

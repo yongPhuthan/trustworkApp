@@ -2,13 +2,15 @@ import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import React from 'react';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-type Props = {};
+type Props = {
+  handlePress: () => void;
+};
 
 const NewCustomerBtn = (props: Props) => {
   return (
     <View style={styles.containerBtn}>
       {/* Your main content here */}
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity onPress={props.handlePress} style={styles.button}>
         <View style={styles.header}>
           <Icon style={styles.icon} name="plus" size={28} color="#19232e" />
 

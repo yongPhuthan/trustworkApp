@@ -14,8 +14,8 @@ import {HOST_URL} from '@env';
 import {v4 as uuidv4} from 'uuid';
 
 type Props = {
-  navigation: StackNavigationProp<ParamListBase, 'SelectContract'>;
-  route: RouteProp<ParamListBase, 'SelectContract'>;
+  navigation: StackNavigationProp<ParamListBase, 'EditContract'>;
+  route: RouteProp<ParamListBase, 'EditContract'>;
   // onGoBack: (data: string) => void;
 };
 type Contract = {
@@ -77,7 +77,7 @@ const createContract = async (data: any) => {
   }
 };
 
-const SelectContract = ({navigation}: Props) => {
+const EditContract = ({navigation}: Props) => {
   const [selectedContracts, setSelectedContracts] = useState<Contract[]>([]);
   const {
     state: {selectedContract},
@@ -212,7 +212,7 @@ const SelectContract = ({navigation}: Props) => {
   );
 };
 
-export default SelectContract;
+export default EditContract;
 
 const styles = StyleSheet.create({
   container: {

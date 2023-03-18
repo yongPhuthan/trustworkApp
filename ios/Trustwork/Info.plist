@@ -86,7 +86,13 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>LSApplicationQueriesSchemes</key>
+<array>
+  <string>data</string>
+</array>
+
 	<key>UIViewControllerBasedStatusBarAppearance</key>
+
 	<false/>
 </dict>
 </plist>

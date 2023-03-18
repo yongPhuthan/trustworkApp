@@ -11,45 +11,49 @@ import * as stateAction from '../redux/Actions';
 type Props = {
   navigation: StackNavigationProp<ParamListBase, 'SelectAudit'>;
   route: RouteProp<ParamListBase, 'SelectAudit'>;
-  onGoBack: (data: string) => void;
+  // onGoBack: (data: string) => void;
 };
 type Audit = {
   title: string;
   description: string;
   price: number;
   imageUri: string;
-  id:string
+  id: number;
 };
-const audits: Audit[] = [
-  { id: '8593742460332',
-    title: 'Audit 1',
-    description: 'This is the description of Audit 1',
-    price: 300,
-    imageUri: 'https://images.unsplash.com/photo-1542057222-14988252f3fa',
-  },
-  {
-    id:'4580502311728',
-    title: 'Audit 2',
-    description: 'This is the description of Audit 2',
-    price: 250,
-    imageUri: 'https://images.unsplash.com/photo-1556228724-4da03d9f6bf4',
-  },
-  { id:'7574013669865',
-    title: 'Audit 3',
-    description: 'This is the description of Audit 3',
-    price: 350,
-    imageUri: 'https://images.unsplash.com/photo-1573497497889-573cf1d9041a',
-  },
-];
 
 const SelectAudit = ({navigation}: Props) => {
   const [selectedAudits, setSelectedAudits] = useState<Audit[]>([]);
+  const route = useRoute();
+
+  const {title, description}: any = route.params;
+
   const {
     state: {selectedAudit},
     dispatch,
   }: any = useContext(Store);
-  const route = useRoute();
-
+  const audits: Audit[] = [
+    {
+      id: 1,
+      title: 'Audit 1',
+      description: 'This is the description of Audit 1',
+      price: 300,
+      imageUri: 'https://images.unsplash.com/photo-1542057222-14988252f3fa',
+    },
+    {
+      id: 2,
+      title: 'Audit 2',
+      description: 'This is the description of Audit 2',
+      price: 250,
+      imageUri: 'https://images.unsplash.com/photo-1556228724-4da03d9f6bf4',
+    },
+    {
+      id: 3,
+      title: 'Audit 3',
+      description: 'This is the description of Audit 3',
+      price: 350,
+      imageUri: 'https://images.unsplash.com/photo-1573497497889-573cf1d9041a',
+    },
+  ];
   const handleSelectAudit = (audit: Audit) => {
     const existingIndex = selectedAudits.findIndex(
       a => a.title === audit.title,
@@ -72,25 +76,24 @@ const SelectAudit = ({navigation}: Props) => {
     }
   };
 
-  const {title, description}: any = route.params;
   useEffect(() => {
     if (selectedAudit.length > 0) {
       setSelectedAudits(selectedAudit);
     }
   }, [selectedAudit]);
 
-    // Create a new array of audits with the `defaultChecked` prop set
-    const auditsWithChecked = audits.map(audit => ({
-      ...audit,
-      defaultChecked: selectedAudits.some(a => a.id === audit.id),
-    }));
-  
+  // Create a new array of audits with the `defaultChecked` prop set
+  const auditsWithChecked = audits.map(audit => ({
+    ...audit,
+    defaultChecked: selectedAudits.some(a => a.id === audit.id),
+  }));
+
   return (
     <View style={{flex: 1}}>
       <ScrollView style={styles.container}>
         <View style={styles.contentContainer}>
           <View style={styles.headerContainer}>
-            <Text style={styles.headerTitle}>Select an Audit</Text>
+            <Text style={styles.headerTitle}>Select an Audit </Text>
           </View>
           {/* Tile & description part */}
           <View style={styles.titleContainer}>
@@ -111,7 +114,7 @@ const SelectAudit = ({navigation}: Props) => {
               />
             ))}
           </View>
-           {/* problem here */}
+          {/* problem here */}
         </View>
       </ScrollView>
       {/* Done button */}

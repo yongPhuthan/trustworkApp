@@ -131,7 +131,14 @@ export const service_list = (payload: object[]) => ({
 export const update_service_list = (payload: object[]) => ({
   type: contrains.UPDATE_SERVICE_LIST,
   payload,
+  
 });
+
+export const reset_service_list = () => ({
+  type: contrains.RESET_SERVICE_LIST,
+  
+});
+
 
 export const selected_audit = (payload: object) => ({
   type: contrains.SELECTED_AUDIT,
@@ -325,6 +332,12 @@ export const serviceList = (payload: object[]) => {
 export const updateServiceList = (payload: object[]) => {
   return (dispatch: any) => {
     dispatch(update_service_list(payload));
+  };
+};
+
+export const resetServiceList = () => {
+  return (dispatch: any) => {
+    dispatch(reset_service_list());
   };
 };
 

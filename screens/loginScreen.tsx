@@ -25,7 +25,7 @@ type RootStackParamList = {
   // Profile: { userId: string };
 };
 
-const SignUpScreen = ({navigation}: Props) => {
+const LoginScreen = ({navigation}: Props) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -33,18 +33,21 @@ const SignUpScreen = ({navigation}: Props) => {
     useState<FirebaseAuthTypes.NativeFirebaseAuthError | null>(null);
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
 
-  const signUpEmail = async() => {
+  const loginWithEmail = async () => {
     await AsyncStorage.setItem('userEmail', email);
     await AsyncStorage.setItem('userPassword', password);
     auth()
-      .createUserWithEmailAndPassword(email, password)
+      .signInWithEmailAndPassword(email, password)
       .then(() => {
-        console.log('User account created & signed in!');
+        console.log('User signed in successfully!');
         navigation.navigate('CompanyUserFormScreen');
       })
       .catch(error => {
-        if (error.code === 'auth/email-already-in-use') {
-          console.log('อีเมลล์นี้ถูกสมัครสมาชิกไปแล้ว');
+        if (
+          error.code === 'auth/user-not-found' ||
+          error.code === 'auth/wrong-password'
+        ) {
+          console.log('อีเมลล์หรือรหัสผ่านไม่ถูกต้อง');
         }
 
         if (error.code === 'auth/invalid-email') {
@@ -54,16 +57,17 @@ const SignUpScreen = ({navigation}: Props) => {
         console.error(error);
       });
   };
+
   useEffect(() => {
     AsyncStorage.getItem('userEmail').then(email => setEmail(email || ''));
     AsyncStorage.getItem('userPassword').then(password =>
       setPassword(password || ''),
     );
   }, []);
-  
+
   return (
     <View style={styles.container}>
-      <Text style={styles.logo}>Sign Up</Text>
+      <Text style={styles.logo}>LOGIN</Text>
       <View style={styles.inputView}>
         <TextInput
           style={styles.inputText}
@@ -83,33 +87,45 @@ const SignUpScreen = ({navigation}: Props) => {
           value={password}
         />
       </View>
-      <TouchableOpacity style={styles.loginBtn} onPress={signUpEmail}>
-        <Text style={styles.loginText}>SIGN UP</Text>
+      <TouchableOpacity style={styles.loginBtn} onPress={loginWithEmail}>
+        <Text style={styles.loginText}>LOGIN</Text>
       </TouchableOpacity>
-      <Button title={'Sign in with Google'} onPress={() =>  {
-    GoogleSignin.configure({
- 
-      webClientId: "74243864435-qne1vsc8riejp19er266ohbmmu7our10.apps.googleusercontent.com",
-        iosClientId: '74243864435-459ndmbeg0fn74qe8oqdtg742344gc44.apps.googleusercontent.com',
-    });
-GoogleSignin.hasPlayServices().then((hasPlayService) => {
-        if (hasPlayService) {
-             GoogleSignin.signIn().then((userInfo) => {
-                       console.log(JSON.stringify(userInfo))
-             }).catch((e) => {
-             console.log("ERROR IS: " + JSON.stringify(e));
-             })
-        }
-}).catch((e) => {
-    console.log("ERROR IS: " + JSON.stringify(e));
-})
-}} />
+      <Button
+        title={'or Sign up'}
+        onPress={() => navigation.navigate('SignUpScreen')}
+      />
+      {/* <Button
+        title={'Sign in with Google'}
+        onPress={() => {
+          GoogleSignin.configure({
+            webClientId:
+              '74243864435-qne1vsc8riejp19er266ohbmmu7our10.apps.googleusercontent.com',
+            iosClientId:
+              '74243864435-459ndmbeg0fn74qe8oqdtg742344gc44.apps.googleusercontent.com',
+          });
+          GoogleSignin.hasPlayServices()
+            .then(hasPlayService => {
+              if (hasPlayService) {
+                GoogleSignin.signIn()
+                  .then(userInfo => {
+                    console.log(JSON.stringify(userInfo));
+                  })
+                  .catch(e => {
+                    console.log('ERROR IS: ' + JSON.stringify(e));
+                  });
+              }
+            })
+            .catch(e => {
+              console.log('ERROR IS: ' + JSON.stringify(e));
+            });
+        }}
+      /> */}
       {error && <Text style={styles.errorText}>{error.message}</Text>}
     </View>
   );
 };
 
-export default SignUpScreen;
+export default LoginScreen;
 
 const styles = StyleSheet.create({
   container: {

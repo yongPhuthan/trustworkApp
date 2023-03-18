@@ -5,6 +5,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 type DatePickerButtonProps = {
   label: string;
   onDateSelected: (date: Date) => void;
+  date:string
 
 };
 
@@ -17,6 +18,7 @@ const thaiDateFormatter = new Intl.DateTimeFormat('th-TH', {
 const DatePickerButton: React.FC<DatePickerButtonProps> = ({
   label,
   onDateSelected,
+  date
 }) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [showPicker, setShowPicker] = useState(false);
@@ -34,6 +36,9 @@ const DatePickerButton: React.FC<DatePickerButtonProps> = ({
 
     
   };
+  const today = new Date();
+  const sevenDaysFromNow = new Date(new Date().setDate(new Date().getDate() + 7));
+
 
   return (
     <View>
@@ -41,7 +46,11 @@ const DatePickerButton: React.FC<DatePickerButtonProps> = ({
         <Text style={styles.label}>{label}</Text>
         {selectedDate ? (
           <Text style={styles.date}>{thaiDateFormatter.format(selectedDate)}</Text>
-        ): <Text style={styles.date}>{thaiDateFormatter.format(new Date())}</Text>}
+        ): 
+        date=='today'?(
+          <Text style={styles.date}>{thaiDateFormatter.format(today)}</Text>
+        ):( <Text style={styles.date}>{thaiDateFormatter.format(sevenDaysFromNow)}</Text>)
+       }
       </TouchableOpacity>
       {showPicker && (
         <View>

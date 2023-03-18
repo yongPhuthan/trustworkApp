@@ -10,8 +10,12 @@ import React, {useState, useContext, useEffect, useRef} from 'react';
 import {Store} from '../redux/Store';
 import * as stateAction from '../redux/Actions';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {RouteProp, ParamListBase} from '@react-navigation/native';
 
-type Props = {};
+type Props = {
+  handleEditClient: Function
+};
 const windowWidth = Dimensions.get('window').width;
 
 const CardClient = (props: Props) => {
@@ -19,9 +23,7 @@ const CardClient = (props: Props) => {
     state: {client_name},
     dispatch,
   }: any = useContext(Store);
-  const handleEditClient = () => {
-    console.log('edit');
-  };
+
 
   return (
     <View>
@@ -30,7 +32,7 @@ const CardClient = (props: Props) => {
           <Icon style={styles.icon} name="account" size={20} color="#19232e" />
           <Text style={styles.label}>ลูกค้า</Text>
         </View>
-        <TouchableOpacity onPress={() => handleEditClient()}>
+        <TouchableOpacity onPress={() => props.handleEditClient()}>
           <View style={styles.editButton}>
             <Icon name="pencil" size={20} color="#19232e" />
             <Text style={styles.editButtonText}>แก้ไข</Text>

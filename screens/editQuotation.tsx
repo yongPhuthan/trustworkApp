@@ -30,21 +30,17 @@ import {useQuery} from 'react-query';
 import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
 import {useMutation} from 'react-query';
 import axios, {AxiosResponse, AxiosError} from 'axios';
-import {HOST_URL} from "@env"
+import {useRoute} from '@react-navigation/native';
 
 type RootStackParamList = {
   Quotation: undefined;
   AddClient: undefined;
   AddProductForm: undefined;
+  EditClientForm : undefined;
   EditProductForm: {item: object[]};
-  EditClientForm: undefined;
-  LoginScreen: undefined;
   SignUpScreen: undefined;
-  SelectContract: {
-    id: string
-   totalPrice: number
-   sellerId: string
-  };
+  SelectContract: undefined;
+  EditContract: undefined;
   WebViewScreen: {id: string}; // add parameter type for WebViewScreen
 };
 
@@ -87,17 +83,23 @@ interface ServiceItem {
   title: string | null;
   // add other properties if needed
 }
+interface Quotation {
+  id: string;
+  // other properties here
+}
 interface CompanyUser {
   id: string;
   // other properties here
 }
+
+
 const thaiDateFormatter = new Intl.DateTimeFormat('th-TH', {
   year: 'numeric',
   month: '2-digit',
   day: '2-digit',
 });
 
-const fetchCompanyUser = async (email: string) => {
+const fetchCompanyUser = async (id: string) => {
   const user = auth().currentUser;
   if (!user) {
     throw new Error('User not authenticated');
@@ -105,14 +107,14 @@ const fetchCompanyUser = async (email: string) => {
   const idToken = await user.getIdToken();
   console.log('userFOUND' + user?.uid);
   const response = await fetch(
-    `http://${HOST_URL}:5001/workerfirebase-f1005/asia-southeast1/queryCompanySeller2`,
+    `http://localhost:5001/workerfirebase-f1005/asia-southeast1/queryDocument`,
     {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${idToken}`,
       },
-      body: JSON.stringify({email}),
+      body: JSON.stringify({id}),
       credentials: 'include',
     },
   );
@@ -124,10 +126,10 @@ const fetchCompanyUser = async (email: string) => {
 
   return data;
 };
-const createQuotation = async (data: any) => {
+const updateQuotation = async (data: any) => {
   const user = auth().currentUser;
   const response = await fetch(
-    'http://localhost:5001/workerfirebase-f1005/asia-southeast1/createQuotation3',
+    'http://localhost:5001/workerfirebase-f1005/asia-southeast1/updateQuotation',
     {
       method: 'POST',
       headers: {
@@ -142,7 +144,7 @@ const createQuotation = async (data: any) => {
   }
 };
 
-const Quotation = ({navigation}: Props) => {
+const EditQuotation = ({navigation}: Props) => {
   const {
     state: {
       client_name,
@@ -156,12 +158,15 @@ const Quotation = ({navigation}: Props) => {
   }: any = useContext(Store);
   // const { data, isLoading } = useQuery('data', fetchData);
   const [email, setEmail] = useState('');
+  const route = useRoute();
   const [isLoadingMutation, setIsLoadingMutation] = useState(false);
   const [showAddClient, setShowAddClient] = useState(true);
   const [allDiscount, setAllDiscount] = useState(0);
   const [status, setStatus] = useState('');
   const [total, setTotal] = useState(0);
   const [companyUser, setCompanyUser] = useState<CompanyUser>({id: ''});
+  const [quotation, setQuotation] = useState<Quotation>();
+
   const [discountValue, setDiscountValue] = useState(0);
   const [summaryAfterDiscount, setSumAfterDiscount] = useState(0);
   const [vat7Amount, setVat7Amount] = useState(0);
@@ -175,20 +180,13 @@ const Quotation = ({navigation}: Props) => {
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
   const [token, setToken] = useState<FirebaseAuthTypes.User | null>(null);
   const quotationId = uuidv4();
+  const {id}: any = route.params;
+
   const [discount, setDiscount] = useState('0');
   const [vat7, setVat7] = useState(false);
-  const totalPrice = useMemo(() => {
-    let total = 0;
-    for (let i = 0; i < serviceList.length; i++) {
-      total += Number(serviceList[i].total);
-    }
-    return total;
-  }, [serviceList]);
-
-
-  const {mutate} = useMutation(createQuotation, {
+  const {mutate} = useMutation(updateQuotation, {
     onSuccess: data => {
-      navigation.navigate('SelectContract', {id: quotationId, totalPrice, sellerId: companyUser.id});
+      navigation.navigate('WebViewScreen', {id: quotationId});
     },
     onError: (error: MyError) => {
       console.error('There was a problem calling the function:', error);
@@ -197,11 +195,30 @@ const Quotation = ({navigation}: Props) => {
   });
 
   const {data, isLoading, isError} = useQuery(
-    ['companyUser', email],
-    () => fetchCompanyUser(email).then(res => res),
+    ['Quotation', id],
+    () => fetchCompanyUser(id).then(res => res),
     {
       onSuccess: data => {
-        setCompanyUser(data);
+        dispatch(stateAction.reset_service_list())
+        const newArray = [];
+        for (let i = 0; i < data[0].services.length; i++) {
+          newArray.push(data[0].services[i]);
+          dispatch(stateAction.service_list(data[0].services[i]));
+
+          
+      }
+        setQuotation(data[1]);
+        setCompanyUser(data[2]);
+        dispatch(stateAction.client_name(data[3].name));
+        dispatch(stateAction.client_address(data[3].address));
+        dispatch(stateAction.client_tel(data[3].mobilePhone));
+        dispatch(stateAction.client_tax(data[3].companyId));
+        dispatch(stateAction.selectedContract(data[4]))
+        setTotal(data[1].allTotal);
+        setDateOffer(data[1].dateOffer);
+        setDateEnd(data[1].dateEnd);
+        setDocnumber(data[1].docNumber);
+        setDiscount(data[1].discountValue);
       },
     },
   );
@@ -222,7 +239,13 @@ const Quotation = ({navigation}: Props) => {
     setCustomerName(value);
   };
 
-
+  const totalPrice = useMemo(() => {
+    let total = 0;
+    for (let i = 0; i < serviceList.length; i++) {
+      total += Number(serviceList[i].total);
+    }
+    return total;
+  }, [serviceList]);
 
   const handleAddClientForm = () => {
     // TODO: Add client to quotation
@@ -236,25 +259,19 @@ const Quotation = ({navigation}: Props) => {
   const handleEditService = (index: number) => {
     navigation.navigate('EditProductForm', {item: serviceList[index]});
   };
-
-  const handleEditClient = () => {
-    navigation.navigate('EditClientForm');
-  };
   const handleCustomerAddressChange = (value: string) => {
     setCustomerAddress(value);
   };
   const handleButtonPress = async () => {
-    navigation.navigate('SelectContract', {id: quotationId, totalPrice, sellerId: companyUser.id});  
-
     setIsLoadingMutation(true);
     try {
       // Perform mutation
-      // const resultArray: MyObject[] = [];
-      // serviceList.forEach((obj: MyObject) => {
-      //   const newObj: any = {...obj};
-      //   newObj.audits = obj.audits.map((audit: Audit) => audit.id);
-      //   resultArray.push(newObj);
-      // });
+      const resultArray: MyObject[] = [];
+      serviceList.forEach((obj: MyObject) => {
+        const newObj: any = {...obj};
+        newObj.audits = obj.audits.map((audit: Audit) => audit.id);
+        resultArray.push(newObj);
+      });
       const clientData = {
         id: uuidv4(),
         name: client_name,
@@ -267,7 +284,7 @@ const Quotation = ({navigation}: Props) => {
         data: {
           id: quotationId,
           summary: totalPrice,
-          services: serviceList,
+          services: resultArray,
           customer: clientData,
           vat7: vat7Amount,
           taxValue: vat3Amount,
@@ -281,6 +298,7 @@ const Quotation = ({navigation}: Props) => {
           allTotal: totalPrice,
           sellerSignature: '',
           offerContract: idContractList,
+          conditions: [],
           userId: companyUser?.id,
         },
       };
@@ -300,9 +318,9 @@ const Quotation = ({navigation}: Props) => {
       .signOut()
       .then(() => console.log('User signed out!'));
   };
-  // const handleSelectContract = () => {
-  //   navigation.navigate('SelectContract');
-  // };
+  const handleSelectContract = () => {
+    navigation.navigate('EditContract');
+  };
   const handleStartDateSelected = (date: Date) => {
     const formattedDate = thaiDateFormatter.format(date);
     setDateOffer(formattedDate);
@@ -325,22 +343,9 @@ const Quotation = ({navigation}: Props) => {
       } else {
         // User is not authenticated, navigate to login page
         console.log('User is not authenticated, navigating to login page...');
-        navigation.navigate('LoginScreen');
+        navigation.navigate('SignUpScreen');
       }
     });
-
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    const randomNum = Math.floor(Math.random() * 900) + 100; // generates a random 3-digit number
-    setDocnumber(`${year}${month}${day}${randomNum}`);
-    setDateOffer(`${year}-${month}-${day}`);
-    const endDate = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
-    const endYear = endDate.getFullYear();
-    const endMonth = String(endDate.getMonth() + 1).padStart(2, '0');
-    const endDay = String(endDate.getDate()).padStart(2, '0');
-    setDateEnd(`${endYear}-${endMonth}-${endDay}`);
     return unsubscribe;
   }, [serviceList, navigation]);
 
@@ -349,8 +354,12 @@ const Quotation = ({navigation}: Props) => {
   }
   const idContractList = selectedContract.map((obj: IdContractList) => obj.id);
 
-  console.log('company user' + JSON.stringify(companyUser));
-  console.log('serviceList' + JSON.stringify(serviceList));
+  const handleEditClient = () => {
+navigation.navigate('EditClientForm');
+    console.log('edit');
+  };
+
+
   return (
     <View style={{flex: 1}}>
       <ScrollView style={styles.container}>
@@ -375,7 +384,8 @@ const Quotation = ({navigation}: Props) => {
         <View style={styles.subContainer}>
           {client_name ? (
             <CardClient
-            handleEditClient={handleEditClient}
+            handleEditClient={() => handleEditClient()} 
+           
             />
           ) : (
             <AddClient handleAddClient={handleAddClientForm} />
@@ -407,7 +417,7 @@ const Quotation = ({navigation}: Props) => {
             onValuesChange={handleValuesChange}
           />
         </View>
-        {/* {selectedContract.length > 0 ? (
+        {selectedContract.length > 0 ? (
           <View style={styles.cardContainer}>
             {selectedContract.map((item: selectedContract) => (
               <TouchableOpacity
@@ -429,7 +439,7 @@ const Quotation = ({navigation}: Props) => {
               </TouchableOpacity>
             )}
           </View>
-        )} */}
+        )}
       </ScrollView>
       <View>
         <TouchableOpacity style={styles.button} onPress={signOutPage}>
@@ -441,7 +451,7 @@ const Quotation = ({navigation}: Props) => {
   );
 };
 
-export default Quotation;
+export default EditQuotation;
 
 const styles = StyleSheet.create({
   container: {},

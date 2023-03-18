@@ -1,40 +1,70 @@
 [{
-    "id": "76cd85ce-86e5-4395-8835-ae4fb549aff3",
-    "title": "Prod1",
-    "description": "desc1",
-    "unitPrice": "5000",
-    "qty": "10",
-    "discountPercent": "",
-    "total": "5000",
-    "audits": [{
-        "id": "8593742460332",
-        "title": "Audit 1",
-        "description": "This is the description of Audit 1",
-        "price": 300,
-        "imageUri": "https://images.unsplash.com/photo-1542057222-14988252f3fa",
-        "defaultChecked": false
-    }]
+    "services": [{
+        "title": "ประตูบานเฟี้ยมอลูมิเนียม",
+        "description": "สีอบดำด้าน",
+        "qty": 10,
+        "unit": "none",
+        "unitPrice": "2333",
+        "total": "2333"
+    },
+    {
+        "title": "ประตูบานเฟี้ยมอลูมิเนียม2",
+        "description": "สีอบดำด้าน",
+        "qty": 10,
+        "unit": "none",
+        "unitPrice": "1500",
+        "total": "900"
+    }
+
+],
+    "contractId": null
 }, {
-    "id": "e0e81ff4-593f-410b-9a6f-59fb5cb73e8d",
-    "title": "Product2",
-    "description": "descption2",
-    "unitPrice": "5666",
-    "qty": "10",
-    "discountPercent": "",
-    "total": "11332",
-    "audits": [{
-        "id": "8593742460332",
-        "title": "Audit 1",
-        "description": "This is the description of Audit 1",
-        "price": 300,
-        "imageUri": "https://images.unsplash.com/photo-1542057222-14988252f3fa",
-        "defaultChecked": false
-    }, {
-        "id": "4580502311728",
-        "title": "Audit 2",
-        "description": "This is the description of Audit 2",
-        "price": 250,
-        "imageUri": "https://images.unsplash.com/photo-1556228724-4da03d9f6bf4",
-        "defaultChecked": false
-    }]
+    "id": "7e903686-5675-4cee-bf6b-0b4e46626063",
+    "vat7": "0",
+    "taxName": "vat3",
+    "taxValue": "0",
+    "summary": "2333",
+    "summaryAfterDiscount": "2333",
+    "discountName": "percent",
+    "discountValue": "0",
+    "allTotal": "2333",
+    "dateOffer": "2023-03-15",
+    "dateEnd": "2023-03-22",
+    "docNumber": "20230315982",
+    "sellerSignature": "none",
+    "customerSignature": "none",
+    "customerDateSign": "none",
+    "status": "pending",
+    "sellerId": "fb3339be-4396-444f-b41c-b3d4c96e7196",
+    "customerId": "96a90a27-9657-41a1-b225-129aeb4ff021",
+    "contractId": null,
+    "conditions": [],
+    "offerContract": ["8593742460332", "4580502311728", "7574013669865"],
+    "periodPercent": [],
+    "periodTHB": [],
+    "created": "2023-03-15T07:21:55.354Z",
+    "updated": "2023-03-15T07:21:55.354Z"
+}, {
+    "id": "fb3339be-4396-444f-b41c-b3d4c96e7196",
+    "bizName": "SiamSafety Engineering",
+    "userName": "ภูฐาน",
+    "userLastName": "คันธบุษบง",
+    "address": "43/3-4 หมู่2 นครปฐม เอฟซี",
+    "officeTel": "053306426",
+    "mobileTel": "0959962030",
+    "bizType": "",
+    "logo": "",
+    "signature": "none",
+    "companyNumber": "",
+    "userEmail": "testapp@gmail.com",
+    "bankaccount": {},
+    "conditions": []
+}, {
+    "id": "96a90a27-9657-41a1-b225-129aeb4ff021",
+    "name": "คุณ ภาณุพง พันธ์ไทย",
+    "address": "43/3-4 หมู่2 ถเพชรเกษม ตอ้อมใหญ่ อสามพราน จนครปฐม",
+    "companyId": "1100800225633",
+    "officePhone": "053306429",
+    "mobilePhone": "053306429",
+    "companyUserId": "fb3339be-4396-444f-b41c-b3d4c96e7196"
 }]

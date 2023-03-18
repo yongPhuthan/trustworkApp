@@ -10,6 +10,7 @@ import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {firebase as firebaseFunction} from '@react-native-firebase/functions';
 import firebase from '../firebase';
+import { useMutation } from 'react-query';
 
 import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
 import {v4 as uuidv4} from 'uuid';
@@ -40,6 +41,28 @@ type RootStackParamList = {
   CompanyUserFormScreen: undefined;
   // Profile: { userId: string };
 };
+interface MyError {
+  response: object;
+  // add other properties if necessary
+}
+
+const createCompanySeller = async (data:any) => {
+  const user = auth().currentUser;
+  const response = await fetch('http://localhost:5001/workerfirebase-f1005/asia-southeast1/createCompanySeller', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${user?.uid}`,
+    },
+    body: JSON.stringify({ data }),
+  });
+  if (!response.ok) {
+    throw new Error('Network response was not ok');
+  }
+  return response.json();
+};
+
+
 
 const CompanyUserFormScreen = ({navigation}: CompanyUserFormScreenProps) => {
   const [bizName, setBizName] = useState<string>('');
@@ -56,10 +79,34 @@ const CompanyUserFormScreen = ({navigation}: CompanyUserFormScreenProps) => {
   const [conditions, setConditions] = useState<string>('');
   const [userEmail, setUserEmail] = useState('');
   const [page, setPage] = useState(1);
-
+  const { mutate, isLoading, isError } = useMutation(createCompanySeller, {
+    onSuccess: () => {
+      navigation.navigate('Quotation');
+      console.log();
+    },
+    onError: (error: MyError) => {
+      console.error('There was a problem calling the function:', error);
+      console.log(error.response);
+    },
+  });
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
-
+  const handleFunction = async () => {
+    const data = {
+      id: uuidv4(),
+      bizName,
+      userName,
+      userLastName,
+      address,
+      officeTel,
+      mobileTel,
+      bizType,
+      logo,
+      companyNumber,
+    };
+    // call the mutation function instead of the fetch function
+    mutate(data);
+  };
 
 
   const handleNextPage = () => {
@@ -69,171 +116,53 @@ const CompanyUserFormScreen = ({navigation}: CompanyUserFormScreenProps) => {
   const handlePrevPage = () => {
     setPage(page - 1);
   };
-  const handleButtonPress = async () => {
-    // Get a reference to the createCompanyUser function
-    const createCompanyUser = firebaseFunction
-      .functions()
-      .httpsCallable('createCompanyUser');
-
-    // Create an object with the user input data
-    const data = {
-      id: uuidv4(), // assuming the user's UID will be used as the companyUser's ID
-      bizName,
-      userName,
-      userLastName,
-      address,
-      officeTel,
-      mobileTel,
-      bizType,
-      logo,
-      companyNumber,
-    };
-
-    try {
-      console.log(JSON.stringify(data)); //
-      // Call the createCompanyUser function with the user input data
-      const result = await createCompanyUser(data);
-      console.log(result); // log the result object to the console
-    } catch (error) {
-      console.error(error); // log any errors to the console
-    }
-  };
-
-  const testConnection = async () => {
-    console.log('test connection');
-    const helloWorldCall = firebase.functions().httpsCallable('helloWorldCall');
-    helloWorldCall().then(result => {
-      console.log(result.data); // "Hello from Firebase! onCall"
-    }).catch(error => {
-      console.log(error);
-    });
-    
-  };
-  const getToken = async () => {
-    const user = firebase.auth().currentUser;
-    if (user) {
-      return user.getIdToken();
-    } else {
-      // Handle user not logged in
-    }
-  };
-  
-
-  const createCompanyUser = async () => {
-    const data = {
-      id: uuidv4(), // assuming the user's UID will be used as the companyUser's ID
-      bizName,
-      userName,
-      userLastName,
-      address,
-      officeTel,
-      mobileTel,
-      bizType,
-      logo,
-      companyNumber,
-    };
-
-    try {
-      console.log('try')
-
-      const response = await fetch('https://asia-southeast1-workerfirebase-f1005.cloudfunctions.net/createCompanyUserReq', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${getToken}`
-        },
-        body: JSON.stringify(data)
-      });
-      
-      const res = await response.json();
-      console.log(res);
-      console.log('token'+(getToken));
-
-      return res;
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
-  };
-  
-
-  const testConnectionHttp = async () => {
-    console.log('test connection');
-    https://us-central1-<project-id>.cloudfunctions.net/date
-    fetch('http://localhost:5001/workerfirebase-f1005/us-central1/helloWorldReq')
-    .then(response => response.text())
-    .then(data => {
-      console.log(data);
-    })
-    .catch(error => {
-      console.error(error);
-    });
-  
-  };
   const signOutPage = () => {
     auth()
       .signOut()
       .then(() => console.log('User signed out!'));
   };
-  async function getAuthToken() {
-    try {
-      const user = auth().currentUser;
-  
-      if (user) {
-        const token = await user.getIdToken();
-        console.log('Auth token:', token);
-        console.log('UID:', user.uid);
 
-        return user;
-      } else {
-        console.error('User not signed in.');
-      }
-    } catch (error) {
-      console.error('Error getting auth token:', error);
-    }
-  }
-
-  const handleFunction = async () => {
-    const user = auth().currentUser;
-    const data = {
-      id: uuidv4(), // assuming the user's UID will be used as the companyUser's ID
-      bizName,
-      userName,
-      userLastName,
-      address,
-      officeTel,
-      mobileTel,
-      bizType,
-      logo,
-      companyNumber,
-    };
-    await fetch('http://localhost:5001/workerfirebase-f1005/asia-southeast1/createCompanySeller', {
+  // const handleFunction = async () => {
+  //   const user = auth().currentUser;
+  //   const data = {
+  //     id: uuidv4(), // assuming the user's UID will be used as the companyUser's ID
+  //     bizName,
+  //     userName,
+  //     userLastName,
+  //     address,
+  //     officeTel,
+  //     mobileTel,
+  //     bizType,
+  //     logo,
+  //     companyNumber,
+  //   };
+  //   await fetch('http://localhost:5001/workerfirebase-f1005/asia-southeast1/createCompanySeller', {
       
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${user?.uid}`,
-      },
-      body: JSON.stringify({ data }),
-    })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      navigation.navigate('Quotation');
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //       'Authorization': `Bearer ${user?.uid}`,
+  //     },
+  //     body: JSON.stringify({ data }),
+  //   })
+  //   .then((response) => {
+  //     if (!response.ok) {
+  //       throw new Error('Network response was not ok');
+  //     }
+  //     navigation.navigate('Quotation');
 
-      // return response.text();
-    })
-    .then((data) => {
-      console.log(data);
-    })
-    .catch((error) => {
-      console.error('There was a problem calling the function:', error);
-      console.log(error.response);
-    });
+  //     // return response.text();
+  //   })
+  //   .then((data) => {
+  //     console.log(data);
+  //   })
+  //   .catch((error) => {
+  //     console.error('There was a problem calling the function:', error);
+  //     console.log(error.response);
+  //   });
     
       
-  };
+  // };
 
   const renderPage1 = () => {
     return (
@@ -283,18 +212,20 @@ const CompanyUserFormScreen = ({navigation}: CompanyUserFormScreenProps) => {
           value={mobileTel}
           onChangeText={setMobileTel}
         />
-        <TouchableOpacity style={styles.button} onPress={testConnectionHttp}>
+        <TouchableOpacity style={styles.button} onPress={handlePrevPage}>
           <Text style={styles.buttonText}>Previous</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={handleFunction}>
-          <Text style={styles.buttonText}>Submit</Text>
+        <TouchableOpacity style={styles.button} disabled={isLoading} onPress={handleFunction}>
+          <Text style={styles.buttonText}>{isLoading ? 'Submitting...' : 'Submit'}</Text>
         </TouchableOpacity>
+
         <TouchableOpacity style={styles.button} onPress={signOutPage}>
           <Text style={styles.buttonText}>sign out page</Text>
         </TouchableOpacity>
       </>
     );
   };
+  
 
 
   return (

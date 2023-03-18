@@ -38,10 +38,27 @@ type ServiceList = {
   discountPercent: number;
   total: number;
 };
+type RootStackParamList = {
+  EditProductForm: { item: {
+    title: string
+    id:string
+    description:string
+    qty:number;
+    unit:string;
+    total: number;
+    unitPrice:number
+    discountPercent: number;
+    audits: {
+      id:string;
+      title:string
+    }[]
+  } };
+  SelectAudit: {title: string, description: string};
 
+};
 type Props = {
-  navigation: StackNavigationProp<ParamListBase, 'EditProductForm'>;
-  route: RouteProp<ParamListBase, 'EditProductForm'>;
+  navigation: StackNavigationProp<RootStackParamList, 'EditProductForm'>;
+  route: RouteProp<RootStackParamList, 'EditProductForm'>;
 };
 
 const EditProductForm = ({navigation, route}: Props) => {
@@ -161,7 +178,7 @@ const EditProductForm = ({navigation, route}: Props) => {
           <Controller
             control={control}
             name="unitPrice"
-            defaultValue={item.unitPrice}
+            defaultValue={String(item.unitPrice)}
             render={({field: {onChange, value}}) => (
               <TextInput
                 style={styles.price}
@@ -194,7 +211,7 @@ const EditProductForm = ({navigation, route}: Props) => {
             <Controller
               control={control}
               name="qty"
-              defaultValue={item.qty}
+              defaultValue={String(item.qty)}
               render={({field: {onChange, value}}) => (
                 <TextInput
                   style={styles.counter}
@@ -242,7 +259,7 @@ const EditProductForm = ({navigation, route}: Props) => {
           <Controller
             control={control}
             name="discountPercent"
-            defaultValue={item.discountPercent}
+            defaultValue={String(item.discountPercent)}
             render={({field: {onChange, value}}) => (
               <TextInput
                 style={styles.price}
@@ -260,7 +277,7 @@ const EditProductForm = ({navigation, route}: Props) => {
           <Controller
             control={control}
             name="total"
-            defaultValue={item.total}
+            defaultValue={String(item.total)}
             render={({field: {value}}) => (
               <TextInput
                 style={styles.priceSummary}
@@ -274,7 +291,7 @@ const EditProductForm = ({navigation, route}: Props) => {
         </View>
         <View></View>
         <View>
-          {item.audits.length > 0 ? (
+          {item.audits?.length > 0 ? (
             <View style={styles.cardContainer}>
               {item.audits.map(audit => (
                 <TouchableOpacity
