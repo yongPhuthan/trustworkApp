@@ -11,6 +11,8 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {firebase as firebaseFunction} from '@react-native-firebase/functions';
 import firebase from '../firebase';
 import { useMutation } from 'react-query';
+import { RadioButton } from 'react-native-paper';
+
 
 import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
 import {v4 as uuidv4} from 'uuid';
@@ -46,21 +48,49 @@ interface MyError {
   // add other properties if necessary
 }
 
+// const createCompanySeller = async (data:any) => {
+//   const user = auth().currentUser;
+//   const response = await fetch('https://asia-southeast1-workerfirebase-f1005.cloudfunctions.net/createCompanySeller', {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json',
+//       'Authorization': `Bearer ${user?.uid}`,
+//     },
+//     body: JSON.stringify({ data }),
+//   });
+//   if (!response.ok) {
+//     throw new Error('Network response was not ok');
+//   }
+//   return ;
+// };
+
 const createCompanySeller = async (data:any) => {
   const user = auth().currentUser;
-  const response = await fetch('http://localhost:5001/workerfirebase-f1005/asia-southeast1/createCompanySeller', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${user?.uid}`,
-    },
-    body: JSON.stringify({ data }),
-  });
-  if (!response.ok) {
-    throw new Error('Network response was not ok');
+  if (!user) {
+    throw new Error('User is not logged in');
   }
-  return response.json();
+  try {
+    console.log('user',user)
+    const response = await fetch('https://asia-southeast1-workerfirebase-f1005.cloudfunctions.net/createCompanySeller', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${user?.uid}`,
+      },
+      body: JSON.stringify({ data }),
+    });
+    console.log('Response:', response.status);
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return ;
+  } catch (error) {
+    console.error(error);
+    throw new Error('There was an error processing the request');
+  }
 };
+
 
 
 
@@ -71,7 +101,7 @@ const CompanyUserFormScreen = ({navigation}: CompanyUserFormScreenProps) => {
   const [address, setAddress] = useState<string>('');
   const [officeTel, setOfficeTel] = useState<string>('');
   const [mobileTel, setMobileTel] = useState<string>('');
-  const [bizType, setBizType] = useState<string>('');
+  // const [bizType, setBizType] = useState<string>('');
   const [logo, setLogo] = useState<string>('');
   const [signature, setSignature] = useState<string | null>(null);
   const [companyNumber, setCompanyNumber] = useState<string>('');
@@ -79,6 +109,8 @@ const CompanyUserFormScreen = ({navigation}: CompanyUserFormScreenProps) => {
   const [conditions, setConditions] = useState<string>('');
   const [userEmail, setUserEmail] = useState('');
   const [page, setPage] = useState(1);
+  const [bizType, setBizType] = useState('individual');
+
   const { mutate, isLoading, isError } = useMutation(createCompanySeller, {
     onSuccess: () => {
       navigation.navigate('Quotation');
@@ -185,12 +217,32 @@ const CompanyUserFormScreen = ({navigation}: CompanyUserFormScreenProps) => {
           value={userLastName}
           onChangeText={setUserLastName}
         />
+  
+        <Text style={styles.label}>Account Type</Text>
+        <View>
+          <Text>Individual</Text>
+          <RadioButton
+            value="individual"
+            status={bizType === 'individual' ? 'checked' : 'unchecked'}
+            onPress={() => setBizType('individual')}
+          />
+        </View>
+        <View>
+          <Text>Business</Text>
+          <RadioButton
+            value="business"
+            status={bizType === 'business' ? 'checked' : 'unchecked'}
+            onPress={() => setBizType('business')}
+          />
+        </View>
+  
         <TouchableOpacity style={styles.button} onPress={handleNextPage}>
           <Text style={styles.buttonText}>Next</Text>
         </TouchableOpacity>
       </>
     );
   };
+  
   const renderPage2 = () => {
     return (
       <>

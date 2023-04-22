@@ -15,8 +15,9 @@ type Props = {
   serviceList: {
     title: string;
     description: string;
-    unitPrice: string;
-    qty: string;
+    unitPrice: number;
+    qty: number;
+    total: number;
   };
   handleEditService: Function;
 
@@ -33,7 +34,7 @@ const CardProject = (props: Props) => {
         onPress={()=>props.handleEditService()}>
         <View style={styles.summary}>
           <Text style={styles.summaryText}>{serviceList.title}</Text>
-          <Text style={styles.summaryPrice}>{serviceList.unitPrice}</Text>
+          <Text style={styles.summaryPrice}>{serviceList.total}</Text>
         </View>
         <View style={styles.description}>
           <Text>{serviceList.description}</Text>

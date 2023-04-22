@@ -30,7 +30,7 @@ import {useQuery} from 'react-query';
 import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
 import {useMutation} from 'react-query';
 import axios, {AxiosResponse, AxiosError} from 'axios';
-import {HOST_URL} from "@env"
+import {HOST_URL, DEV_API_URL,PROD_API_URL} from "@env"
 
 type RootStackParamList = {
   Quotation: undefined;
@@ -40,6 +40,9 @@ type RootStackParamList = {
   EditClientForm: undefined;
   LoginScreen: undefined;
   SignUpScreen: undefined;
+  InstallmentScreen:{
+    data:any
+  }
   SelectContract: {
     id: string
    totalPrice: number
@@ -97,15 +100,21 @@ const thaiDateFormatter = new Intl.DateTimeFormat('th-TH', {
   day: '2-digit',
 });
 
-const fetchCompanyUser = async (email: string) => {
+const fetchCompanyUser = async (email: string, isEmulator:boolean) => {
   const user = auth().currentUser;
   if (!user) {
     throw new Error('User not authenticated');
   }
   const idToken = await user.getIdToken();
-  console.log('userFOUND' + user?.uid);
+  let url;
+  if (isEmulator) {
+    url = `http://${HOST_URL}:5001/workerfirebase-f1005/asia-southeast1/queryCompanySeller2`;
+  } else {
+    console.log('isEmulator Fetch',isEmulator)
+    url = `https://asia-southeast1-workerfirebase-f1005.cloudfunctions.net/queryCompanySeller2`;
+  }
   const response = await fetch(
-    `http://${HOST_URL}:5001/workerfirebase-f1005/asia-southeast1/queryCompanySeller2`,
+    url,
     {
       method: 'POST',
       headers: {
@@ -124,10 +133,17 @@ const fetchCompanyUser = async (email: string) => {
 
   return data;
 };
-const createQuotation = async (data: any) => {
+
+const createQuotation = async (data: any, isEmulator:boolean) => {
   const user = auth().currentUser;
+  let url;
+  if (isEmulator) {
+    url = `http://${HOST_URL}:5001/workerfirebase-f1005/asia-southeast1/createQuotation3`;
+  } else {
+    url = `https://asia-southeast1-workerfirebase-f1005.cloudfunctions.net/createQuotation3`;
+  }
   const response = await fetch(
-    'http://localhost:5001/workerfirebase-f1005/asia-southeast1/createQuotation3',
+    url,
     {
       method: 'POST',
       headers: {
@@ -151,6 +167,7 @@ const Quotation = ({navigation}: Props) => {
       client_address,
       client_tel,
       client_tax,
+      isEmulator
     },
     dispatch,
   }: any = useContext(Store);
@@ -186,19 +203,19 @@ const Quotation = ({navigation}: Props) => {
   }, [serviceList]);
 
 
-  const {mutate} = useMutation(createQuotation, {
-    onSuccess: data => {
-      navigation.navigate('SelectContract', {id: quotationId, totalPrice, sellerId: companyUser.id});
-    },
-    onError: (error: MyError) => {
-      console.error('There was a problem calling the function:', error);
-      console.log(error.response);
-    },
-  });
+  // const {mutate} = useMutation(createQuotation, {
+  //   onSuccess: data => {
+  //     navigation.navigate('SelectContract', {id: quotationId, totalPrice, sellerId: companyUser.id});
+  //   },
+  //   onError: (error: MyError) => {
+  //     console.error('There was a problem calling the function:', error);
+  //     console.log(error.response);
+  //   },
+  // });
 
   const {data, isLoading, isError} = useQuery(
     ['companyUser', email],
-    () => fetchCompanyUser(email).then(res => res),
+    () => fetchCompanyUser(email,isEmulator).then(res => res),
     {
       onSuccess: data => {
         setCompanyUser(data);
@@ -244,7 +261,7 @@ const Quotation = ({navigation}: Props) => {
     setCustomerAddress(value);
   };
   const handleButtonPress = async () => {
-    navigation.navigate('SelectContract', {id: quotationId, totalPrice, sellerId: companyUser.id});  
+    // navigation.navigate('SelectContract', {id: quotationId, totalPrice, sellerId: companyUser.id});  
 
     setIsLoadingMutation(true);
     try {
@@ -284,7 +301,9 @@ const Quotation = ({navigation}: Props) => {
           userId: companyUser?.id,
         },
       };
-      await mutate(apiData);
+      // await mutate(apiData);
+   navigation.navigate('InstallmentScreen', {data: apiData });
+
       setIsLoadingMutation(false);
     } catch (error: Error | AxiosError | any) {
       console.error('There was a problem calling the function:', error);
@@ -351,6 +370,7 @@ const Quotation = ({navigation}: Props) => {
 
   console.log('company user' + JSON.stringify(companyUser));
   console.log('serviceList' + JSON.stringify(serviceList));
+  console.log('isEmulator', isEmulator)
   return (
     <View style={{flex: 1}}>
       <ScrollView style={styles.container}>
@@ -407,6 +427,7 @@ const Quotation = ({navigation}: Props) => {
             onValuesChange={handleValuesChange}
           />
         </View>
+
         {/* {selectedContract.length > 0 ? (
           <View style={styles.cardContainer}>
             {selectedContract.map((item: selectedContract) => (

@@ -7,7 +7,7 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:74243864435:android:dcf3fa88625094956cf706",
+        "mobilesdk_app_id": "1:74243864435:android:a82cf8e99cb1f71f6cf706",
         "android_client_info": {
           "package_name": "com.trustwork"
         }
@@ -22,7 +22,7 @@
           }
         },
         {
-          "client_id": "74243864435-qne1vsc8riejp19er266ohbmmu7our10.apps.googleusercontent.com",
+          "client_id": "74243864435-ru5lii0kjqsqn9henfcn6v6unlg53le2.apps.googleusercontent.com",
           "client_type": 3
         }
       ],

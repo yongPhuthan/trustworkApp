@@ -186,7 +186,7 @@ const EditProductForm = ({navigation, route}: Props) => {
                 keyboardType="number-pad"
                 onChangeText={value => {
                   onChange(value);
-                  setPrice(parseInt(value, 10));
+                  setPrice(parseInt(value, 1));
                 }}
                 value={value}
               />
@@ -219,7 +219,7 @@ const EditProductForm = ({navigation, route}: Props) => {
                   keyboardType="number-pad"
                   onChangeText={value => {
                     onChange(value);
-                    setQuantity(parseInt(value, 10));
+                    setQuantity(parseInt(value, 1));
                   }}
                   value={qty.toString()}
                 />

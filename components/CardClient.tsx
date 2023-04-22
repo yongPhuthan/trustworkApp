@@ -12,6 +12,7 @@ import * as stateAction from '../redux/Actions';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RouteProp, ParamListBase} from '@react-navigation/native';
+import { client_address } from '../redux/Actions';
 
 type Props = {
   handleEditClient: Function
@@ -20,7 +21,7 @@ const windowWidth = Dimensions.get('window').width;
 
 const CardClient = (props: Props) => {
   const {
-    state: {client_name},
+    state: {client_name, client_address, client_tel, client_tax},
     dispatch,
   }: any = useContext(Store);
 
@@ -45,11 +46,11 @@ const CardClient = (props: Props) => {
           <Text style={styles.summaryPrice}></Text>
         </View>
         <View style={styles.description}>
-          <Text>43/3-4 หมู่2 ถนน.เพชรเกษม ต.อ้อมใหญ่อ.สามพราน จ.ยครปฐม</Text>
+          <Text>{client_address}</Text>
         </View>
         <View style={styles.telAndTax}>
-          <Text>โทร.095-9962030</Text>
-          <Text>1100800667422</Text>
+          <Text>โทร.{client_tel}</Text>
+          <Text>{client_tax}</Text>
         </View>
       </TouchableOpacity>
     </View>

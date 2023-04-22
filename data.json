@@ -1,70 +1,47 @@
-[{
-    "services": [{
-        "title": "ประตูบานเฟี้ยมอลูมิเนียม",
-        "description": "สีอบดำด้าน",
-        "qty": 10,
-        "unit": "none",
-        "unitPrice": "2333",
-        "total": "2333"
+{
+    "data": {
+        "allTotal": 9890,
+        "customer": {
+            "address": "เชียงใหม่ การไฟฟ้า 555",
+            "companyId": "1100800667422",
+            "id": "7f3d80f4-d9b6-44c5-a11f-8e4e21a62a04",
+            "mobilePhone": "052558588",
+            "name": "ภรประวีน คันธบุษบง",
+            "officePhone": "052558588"
+        },
+        "dateEnd": "2023-03-30",
+        "dateOffer": "2023-03-23",
+        "discountName": "percent",
+        "discountValue": 0,
+        "docNumber": "20230323915",
+        "id": "c3350e04-72bb-4bc7-924f-cfb451e6e853",
+        "offerContract": [],
+        "sellerSignature": "",
+        "services": [
+            [Object],
+            [Object]
+        ],
+        "summary": 9890,
+        "summaryAfterDiscount": 9890,
+        "taxName": "vat3",
+        "taxValue": 0,
+        "userId": "6388420b-133e-4ec2-a1fe-9eec81abd4b2",
+        "vat7": 0
     },
-    {
-        "title": "ประตูบานเฟี้ยมอลูมิเนียม2",
-        "description": "สีอบดำด้าน",
-        "qty": 10,
-        "unit": "none",
-        "unitPrice": "1500",
-        "total": "900"
-    }
-
-],
-    "contractId": null
-}, {
-    "id": "7e903686-5675-4cee-bf6b-0b4e46626063",
-    "vat7": "0",
-    "taxName": "vat3",
-    "taxValue": "0",
-    "summary": "2333",
-    "summaryAfterDiscount": "2333",
-    "discountName": "percent",
-    "discountValue": "0",
-    "allTotal": "2333",
-    "dateOffer": "2023-03-15",
-    "dateEnd": "2023-03-22",
-    "docNumber": "20230315982",
-    "sellerSignature": "none",
-    "customerSignature": "none",
-    "customerDateSign": "none",
-    "status": "pending",
-    "sellerId": "fb3339be-4396-444f-b41c-b3d4c96e7196",
-    "customerId": "96a90a27-9657-41a1-b225-129aeb4ff021",
-    "contractId": null,
-    "conditions": [],
-    "offerContract": ["8593742460332", "4580502311728", "7574013669865"],
-    "periodPercent": [],
-    "periodTHB": [],
-    "created": "2023-03-15T07:21:55.354Z",
-    "updated": "2023-03-15T07:21:55.354Z"
-}, {
-    "id": "fb3339be-4396-444f-b41c-b3d4c96e7196",
-    "bizName": "SiamSafety Engineering",
-    "userName": "ภูฐาน",
-    "userLastName": "คันธบุษบง",
-    "address": "43/3-4 หมู่2 นครปฐม เอฟซี",
-    "officeTel": "053306426",
-    "mobileTel": "0959962030",
-    "bizType": "",
-    "logo": "",
-    "signature": "none",
-    "companyNumber": "",
-    "userEmail": "testapp@gmail.com",
-    "bankaccount": {},
-    "conditions": []
-}, {
-    "id": "96a90a27-9657-41a1-b225-129aeb4ff021",
-    "name": "คุณ ภาณุพง พันธ์ไทย",
-    "address": "43/3-4 หมู่2 ถเพชรเกษม ตอ้อมใหญ่ อสามพราน จนครปฐม",
-    "companyId": "1100800225633",
-    "officePhone": "053306429",
-    "mobilePhone": "053306429",
-    "companyUserId": "fb3339be-4396-444f-b41c-b3d4c96e7196"
-}]
+    "periodPercent": [{
+        "amount": 9000,
+        "details": "ชำระหลังส่งมอบงาน",
+        "installment": 1,
+        "percentage": 30
+    }, {
+        "amount": 9000,
+        "details": "ชำระงวดที่ 2",
+        "installment": 2,
+        "percentage": 30
+    }, {
+        "amount": 12000,
+        "details": "ชำระงวดที่ 3",
+        "installment": 3,
+        "percentage": 40
+    }]
+}

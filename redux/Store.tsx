@@ -16,8 +16,9 @@ export type StateType = {
   serviceList: [];
   selectedAudit: [];
   selectedContract: [];
-
+  periodPercent: JSON[];
   allTotal: number;
+  isEmulator: boolean;
 };
 
 type ActionType = {
@@ -44,6 +45,8 @@ export const Store = createContext<ContextType>({
     selectedAudit: [],
     selectedContract: [],
     allTotal: 0,
+    periodPercent: [],
+    isEmulator: false,
   },
   dispatch: () => {},
 });
@@ -61,6 +64,8 @@ const initialState: StateType = {
   selectedAudit: [],
   selectedContract: [],
   allTotal: 0,
+  periodPercent: [],
+  isEmulator: false,
 };
 
 function reducer(state: StateType, action: ActionType): StateType {
@@ -96,6 +101,13 @@ function reducer(state: StateType, action: ActionType): StateType {
       case contrains.RESET_SERVICE_LIST:
         return {...state, serviceList: []};
 
+        case contrains.PERIOD_PERCENT:
+          return {
+            ...state,
+            periodPercent: action.payload as any,
+          };
+
+
     case contrains.SELECTED_AUDIT:
       return {
         ...state,
@@ -115,6 +127,9 @@ function reducer(state: StateType, action: ActionType): StateType {
       return {...state, serviceList: action.payload as any};
     case contrains.ALLTOTAL:
       return {...state, allTotal: action.payload as number};
+
+      case contrains.IS_EMULATOR:
+        return {...state, isEmulator: action.payload as unknown as boolean};
 
     case contrains.SELECTED_CONTRACT:
       return {

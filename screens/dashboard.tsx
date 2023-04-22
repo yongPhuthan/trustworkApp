@@ -1,5 +1,5 @@
 import {StyleSheet, View} from 'react-native';
-import React, { useState, useEffect } from 'react';
+import React, {useState, useContext, useEffect, useMemo} from 'react';
 import CardDashBoard from '../components/CardDashBoard';
 import {FlatList, TouchableOpacity} from 'react-native-gesture-handler';
 import FooterBtn from '../components/styles/FooterBtn';
@@ -7,6 +7,7 @@ import NewCustomerBtn from '../components/styles/NewCustomerBtn';
 import auth from '@react-native-firebase/auth';
 import {HOST_URL} from "@env"
 import {StackNavigationProp} from '@react-navigation/stack';
+import {Store} from '../redux/Store';
 
 
 type Props = {};
@@ -34,17 +35,30 @@ EditQuotation : {id: string};
   Dashboard: undefined;
 };
 
-
 const Dashboard = ({navigation}: DashboardScreenProps) => {
   const [isExtended, setIsExtended] = React.useState(true);
+  const {
+    state: {
+
+      isEmulator
+    },
+    dispatch,
+  }: any = useContext(Store);
   const [companyData, setCompanyData] = useState(null);
   const [quotationData, setQuotationData] = useState<Quotation[] | null>(null);
   const fabStyle = {width: 50};
   const handleFABPress = () => {
     // Do something when FAB is pressed
   };
+
   const fetchDashboardData = async (email: string, authToken: string) => {
-    const url = `http://${HOST_URL}:5001/workerfirebase-f1005/asia-southeast1/queryDashBoard`;
+   
+  let url;
+  if (isEmulator) {
+    url = `http://${HOST_URL}:5001/workerfirebase-f1005/asia-southeast1/queryDashBoard`;
+  } else {
+    url = `https://asia-southeast1-workerfirebase-f1005.cloudfunctions.net/queryDashBoard`;
+  }
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -56,8 +70,10 @@ const Dashboard = ({navigation}: DashboardScreenProps) => {
       }),
     });
     const data = await response.json();
+    
+  
     return data;
-  }
+  };
   const getTokenAndEmail = async () => {
     const currentUser = auth().currentUser;
     if (currentUser) {
@@ -81,7 +97,6 @@ const Dashboard = ({navigation}: DashboardScreenProps) => {
           setCompanyData(data[0]);
           setQuotationData(data[1]);
         }
-
       }
     };
     fetchData();

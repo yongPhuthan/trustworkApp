@@ -4,45 +4,58 @@ import {
   View,
   TextInput,
   TouchableOpacity,
-  Button,
+  Keyboard,
+  Dimensions,
 } from 'react-native';
-import React, {useState, useEffect} from 'react';
-import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
-import {StackNavigationProp} from '@react-navigation/stack';
+import React, { useState } from 'react';
+import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import { StackNavigationProp } from '@react-navigation/stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-  GoogleSignin,
-  statusCodes,
-} from '@react-native-google-signin/google-signin';
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+
 interface Props {
   navigation: StackNavigationProp<RootStackParamList, 'SignUpScreen'>;
 }
+
 type RootStackParamList = {
   SettingCompany: undefined;
   SignUpScreen: undefined;
   CompanyUserFormScreen: undefined;
-
-  // Profile: { userId: string };
 };
 
-const SignUpScreen = ({navigation}: Props) => {
+const SignUpScreen = ({ navigation }: Props) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState<FirebaseAuthTypes.NativeFirebaseAuthError | null>(null);
 
-  const [error, setError] =
-    useState<FirebaseAuthTypes.NativeFirebaseAuthError | null>(null);
-  const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
-
-  const signUpEmail = async() => {
+  const signUpEmail = async () => {
     await AsyncStorage.setItem('userEmail', email);
     await AsyncStorage.setItem('userPassword', password);
+
+    if (password !== confirmPassword) {
+      setError({
+        code: 'auth/passwords-not-matching',
+        message: 'รหัสผ่านไม่ตรงกัน',
+        userInfo: {
+          authCredential: null,
+          resolver: null,
+        },
+        name: 'FirebaseAuthError',
+        namespace: '',
+        nativeErrorCode: '',
+        nativeErrorMessage: '',
+      });
+      return;
+    }
+
     auth()
       .createUserWithEmailAndPassword(email, password)
       .then(() => {
         console.log('User account created & signed in!');
         navigation.navigate('CompanyUserFormScreen');
       })
-      .catch(error => {
+      .catch((error) => {
         if (error.code === 'auth/email-already-in-use') {
           console.log('อีเมลล์นี้ถูกสมัครสมาชิกไปแล้ว');
         }
@@ -51,24 +64,19 @@ const SignUpScreen = ({navigation}: Props) => {
           console.log('กรอกอีเมลล์ไม่ถูกต้อง');
         }
 
+        setError(error);
         console.error(error);
       });
   };
-  useEffect(() => {
-    AsyncStorage.getItem('userEmail').then(email => setEmail(email || ''));
-    AsyncStorage.getItem('userPassword').then(password =>
-      setPassword(password || ''),
-    );
-  }, []);
-  
+
   return (
     <View style={styles.container}>
-      <Text style={styles.logo}>Sign Up</Text>
+      <Text style={styles.logo}>Trustwork</Text>
       <View style={styles.inputView}>
         <TextInput
           style={styles.inputText}
           placeholder="Email..."
-          placeholderTextColor="#003f5c"
+          placeholderTextColor="#888"
           onChangeText={setEmail}
           value={email}
         />
@@ -78,80 +86,99 @@ const SignUpScreen = ({navigation}: Props) => {
           style={styles.inputText}
           secureTextEntry
           placeholder="Password..."
-          placeholderTextColor="#003f5c"
+          placeholderTextColor="#888"
           onChangeText={setPassword}
           value={password}
         />
       </View>
+      <View style={styles.inputView}>
+        <TextInput
+          style={styles.inputText}
+          secureTextEntry
+          placeholder="Confirm Password..."
+          placeholderTextColor="#888"
+          onChangeText={setConfirmPassword}
+          value={confirmPassword}
+        />
+      </View>
+
       <TouchableOpacity style={styles.loginBtn} onPress={signUpEmail}>
         <Text style={styles.loginText}>SIGN UP</Text>
       </TouchableOpacity>
-      <Button title={'Sign in with Google'} onPress={() =>  {
-    GoogleSignin.configure({
- 
-      webClientId: "74243864435-qne1vsc8riejp19er266ohbmmu7our10.apps.googleusercontent.com",
-        iosClientId: '74243864435-459ndmbeg0fn74qe8oqdtg742344gc44.apps.googleusercontent.com',
-    });
-GoogleSignin.hasPlayServices().then((hasPlayService) => {
-        if (hasPlayService) {
-             GoogleSignin.signIn().then((userInfo) => {
-                       console.log(JSON.stringify(userInfo))
-             }).catch((e) => {
-             console.log("ERROR IS: " + JSON.stringify(e));
-             })
-        }
-}).catch((e) => {
-    console.log("ERROR IS: " + JSON.stringify(e));
-})
-}} />
+
       {error && <Text style={styles.errorText}>{error.message}</Text>}
     </View>
   );
 };
-
 export default SignUpScreen;
+
+const windowWidth = Dimensions.get('window').width;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#003f5c',
+    backgroundColor: '#fbfbfb',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  logo: {
+    },
+    logo: {
     fontWeight: 'bold',
     fontSize: 50,
-    color: '#fb5b5a',
+    color: '#012d62', // #4
     marginBottom: 40,
-  },
-  inputView: {
+    },
+    inputView: {
     width: '80%',
-    backgroundColor: '#465881',
-    borderRadius: 25,
+    backgroundColor: 'white', // #5
+    borderRadius: 5,
     height: 50,
     marginBottom: 20,
     justifyContent: 'center',
     padding: 20,
-  },
-  inputText: {
+    shadowColor: '#ed8022', // #3
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 5,
+    },
+    inputText: {
+    height: 50,
+    width: '90%',
+    color: '#003f5c',
+    },
+    inputPhoneText: {
     height: 50,
     color: 'white',
-  },
-  loginBtn: {
-    width: '80%',
-    backgroundColor: '#fb5b5a',
+    borderWidth: 1,
+    borderColor: '#465881',
     borderRadius: 25,
-    height: 50,
+    paddingHorizontal: 20,
+    margin: 5,
+    textDecorationColor: 'white',
+    textAlign: 'center',
+    },
+    inputFieldsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center', // Center the input fields
+    flexWrap: 'wrap', // Wrap input fields if they don't fit in a single line
+    },
+    loginBtn: {
+    width: '80%',
+    backgroundColor: '#0c5caa', // #2
+    borderRadius: 10,
+    height: 40,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 40,
     marginBottom: 10,
-  },
-  loginText: {
+    },
+    loginText: {
     color: 'white',
-  },
-  errorText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    },
+    errorText: {
     color: 'red',
-    marginTop: 20,
-  },
-});
+    marginTop: 10,
+    },
+    });

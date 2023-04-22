@@ -31,12 +31,14 @@ import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
 import {useMutation} from 'react-query';
 import axios, {AxiosResponse, AxiosError} from 'axios';
 import {useRoute} from '@react-navigation/native';
+import {HOST_URL} from "@env"
+import FooterBtnEdit from '../components/styles/FooterBtnEdit';
 
 type RootStackParamList = {
   Quotation: undefined;
   AddClient: undefined;
   AddProductForm: undefined;
-  EditClientForm : undefined;
+  EditClientForm: undefined;
   EditProductForm: {item: object[]};
   SignUpScreen: undefined;
   SelectContract: undefined;
@@ -92,22 +94,29 @@ interface CompanyUser {
   // other properties here
 }
 
-
 const thaiDateFormatter = new Intl.DateTimeFormat('th-TH', {
   year: 'numeric',
   month: '2-digit',
   day: '2-digit',
 });
 
-const fetchCompanyUser = async (id: string) => {
+const fetchCompanyUser = async ({ id, isEmulator }: { id: string, isEmulator: boolean }) => {
   const user = auth().currentUser;
   if (!user) {
     throw new Error('User not authenticated');
   }
   const idToken = await user.getIdToken();
   console.log('userFOUND' + user?.uid);
+  console.log('id found' + id);
+
+  let url;
+  if (isEmulator) {
+    url = `http://${HOST_URL}:5001/workerfirebase-f1005/asia-southeast1/queryDocument`;
+  } else {
+    url = `https://asia-southeast1-workerfirebase-f1005.cloudfunctions.net/queryDocument`;
+  }
   const response = await fetch(
-    `http://localhost:5001/workerfirebase-f1005/asia-southeast1/queryDocument`,
+    url,
     {
       method: 'POST',
       headers: {
@@ -128,17 +137,24 @@ const fetchCompanyUser = async (id: string) => {
 };
 const updateQuotation = async (data: any) => {
   const user = auth().currentUser;
-  const response = await fetch(
-    'http://localhost:5001/workerfirebase-f1005/asia-southeast1/updateQuotation',
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${user?.uid}`,
-      },
-      body: JSON.stringify({data}),
+  const {
+    state: {isEmulator},
+    dispatch,
+  }: any = useContext(Store);
+  let url;
+  if (isEmulator) {
+    url = `http://${HOST_URL}:5001/workerfirebase-f1005/asia-southeast1/updateQuotation`;
+  } else {
+    url = `https://asia-southeast1-workerfirebase-f1005.cloudfunctions.net/updateQuotation`;
+  }
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${user?.uid}`,
     },
-  );
+    body: JSON.stringify({data}),
+  });
   if (!response.ok) {
     throw new Error('Network response was not ok');
   }
@@ -153,6 +169,7 @@ const EditQuotation = ({navigation}: Props) => {
       client_address,
       client_tel,
       client_tax,
+      isEmulator
     },
     dispatch,
   }: any = useContext(Store);
@@ -196,24 +213,22 @@ const EditQuotation = ({navigation}: Props) => {
 
   const {data, isLoading, isError} = useQuery(
     ['Quotation', id],
-    () => fetchCompanyUser(id).then(res => res),
+    () => fetchCompanyUser({  id, isEmulator }).then(res => res),
     {
       onSuccess: data => {
-        dispatch(stateAction.reset_service_list())
+        dispatch(stateAction.reset_service_list());
         const newArray = [];
         for (let i = 0; i < data[0].services.length; i++) {
           newArray.push(data[0].services[i]);
           dispatch(stateAction.service_list(data[0].services[i]));
-
-          
-      }
+        }
         setQuotation(data[1]);
         setCompanyUser(data[2]);
         dispatch(stateAction.client_name(data[3].name));
         dispatch(stateAction.client_address(data[3].address));
         dispatch(stateAction.client_tel(data[3].mobilePhone));
         dispatch(stateAction.client_tax(data[3].companyId));
-        dispatch(stateAction.selectedContract(data[4]))
+        dispatch(stateAction.selectedContract(data[4]));
         setTotal(data[1].allTotal);
         setDateOffer(data[1].dateOffer);
         setDateEnd(data[1].dateEnd);
@@ -262,6 +277,12 @@ const EditQuotation = ({navigation}: Props) => {
   const handleCustomerAddressChange = (value: string) => {
     setCustomerAddress(value);
   };
+
+const handlewWebView=()=>{
+  console.log('id quotation',quotationId)
+  navigation.navigate('WebViewScreen', {id});
+}
+
   const handleButtonPress = async () => {
     setIsLoadingMutation(true);
     try {
@@ -355,10 +376,9 @@ const EditQuotation = ({navigation}: Props) => {
   const idContractList = selectedContract.map((obj: IdContractList) => obj.id);
 
   const handleEditClient = () => {
-navigation.navigate('EditClientForm');
+    navigation.navigate('EditClientForm');
     console.log('edit');
   };
-
 
   return (
     <View style={{flex: 1}}>
@@ -383,10 +403,7 @@ navigation.navigate('EditClientForm');
         </View>
         <View style={styles.subContainer}>
           {client_name ? (
-            <CardClient
-            handleEditClient={() => handleEditClient()} 
-           
-            />
+            <CardClient handleEditClient={() => handleEditClient()} />
           ) : (
             <AddClient handleAddClient={handleAddClientForm} />
           )}
@@ -445,7 +462,7 @@ navigation.navigate('EditClientForm');
         <TouchableOpacity style={styles.button} onPress={signOutPage}>
           <Text style={styles.buttonText}>sign out page</Text>
         </TouchableOpacity>
-        <FooterBtn onPress={handleButtonPress} />
+        <FooterBtnEdit onPress={handleButtonPress} WebView={handlewWebView}/>
       </View>
     </View>
   );

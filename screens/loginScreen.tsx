@@ -10,6 +10,7 @@ import React, {useState, useEffect} from 'react';
 import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
 import {StackNavigationProp} from '@react-navigation/stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import {
   GoogleSignin,
   statusCodes,
@@ -21,6 +22,7 @@ type RootStackParamList = {
   SettingCompany: undefined;
   SignUpScreen: undefined;
   CompanyUserFormScreen: undefined;
+  Dashboard: undefined;
 
   // Profile: { userId: string };
 };
@@ -29,8 +31,40 @@ const LoginScreen = ({navigation}: Props) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const [error, setError] =
-    useState<FirebaseAuthTypes.NativeFirebaseAuthError | null>(null);
+
+  const [confirm, setConfirm] = useState<FirebaseAuthTypes.ConfirmationResult | null>(null);
+  
+    // verification code (OTP - One-Time-Passcode)
+    const [code, setCode] = useState('');
+  
+    // Handle login
+    function onAuthStateChanged(user:any) {
+      if (user) {
+      
+      }
+    }
+
+      // Handle the button press
+  const signInWithPhoneNumber = async (phoneNumber: string) => {
+    try {
+      const confirmation = await auth().signInWithPhoneNumber(phoneNumber);
+      setConfirm(confirmation);
+    } catch (error) {
+      console.log('Error signing in with phone number:', error);
+    }
+  };
+
+  async function confirmCode() {
+    try {
+      await confirm?.confirm(code);
+    } catch (error) {
+      console.log('Invalid code.');
+    }
+  }
+
+
+
+  const [error, setError] = useState<FirebaseAuthTypes.NativeFirebaseAuthError | null>(null);
   const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
 
   const loginWithEmail = async () => {
@@ -40,7 +74,7 @@ const LoginScreen = ({navigation}: Props) => {
       .signInWithEmailAndPassword(email, password)
       .then(() => {
         console.log('User signed in successfully!');
-        navigation.navigate('CompanyUserFormScreen');
+        navigation.navigate('Dashboard');
       })
       .catch(error => {
         if (
@@ -58,11 +92,15 @@ const LoginScreen = ({navigation}: Props) => {
       });
   };
 
+  // useEffect(() => {
+  //   AsyncStorage.getItem('userEmail').then(email => setEmail(email || ''));
+  //   AsyncStorage.getItem('userPassword').then(password =>
+  //     setPassword(password || ''),
+  //   );
+  // }, []);
   useEffect(() => {
-    AsyncStorage.getItem('userEmail').then(email => setEmail(email || ''));
-    AsyncStorage.getItem('userPassword').then(password =>
-      setPassword(password || ''),
-    );
+    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+    return subscriber; // unsubscribe on unmount
   }, []);
 
   return (
@@ -94,33 +132,18 @@ const LoginScreen = ({navigation}: Props) => {
         title={'or Sign up'}
         onPress={() => navigation.navigate('SignUpScreen')}
       />
-      {/* <Button
-        title={'Sign in with Google'}
-        onPress={() => {
-          GoogleSignin.configure({
-            webClientId:
-              '74243864435-qne1vsc8riejp19er266ohbmmu7our10.apps.googleusercontent.com',
-            iosClientId:
-              '74243864435-459ndmbeg0fn74qe8oqdtg742344gc44.apps.googleusercontent.com',
-          });
-          GoogleSignin.hasPlayServices()
-            .then(hasPlayService => {
-              if (hasPlayService) {
-                GoogleSignin.signIn()
-                  .then(userInfo => {
-                    console.log(JSON.stringify(userInfo));
-                  })
-                  .catch(e => {
-                    console.log('ERROR IS: ' + JSON.stringify(e));
-                  });
-              }
-            })
-            .catch(e => {
-              console.log('ERROR IS: ' + JSON.stringify(e));
-            });
-        }}
-      /> */}
-      {error && <Text style={styles.errorText}>{error.message}</Text>}
+      {confirm ? (
+    <>
+      <TextInput value={code} onChangeText={text => setCode(text)} />
+      <Button title="Confirm Code" onPress={() => confirmCode()} />
+    </>
+  ) : (
+    <Button
+      title="Phone Number Sign In"
+      onPress={() => signInWithPhoneNumber('+66 959962030')}
+    />
+  )}
+  {error && <Text style={styles.errorText}>{error.message}</Text>}
     </View>
   );
 };

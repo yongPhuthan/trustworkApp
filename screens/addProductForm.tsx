@@ -69,7 +69,7 @@ const serviceID = uuidv4()
       title: data.title,
       description: data.description,
       unitPrice: data.unitPrice,
-      qty: data.qty,
+      qty: qty,
       discountPercent: data.discountPercent,
       total: (qty * unitPrice).toString(),
       audits:selectedAudits
@@ -164,7 +164,6 @@ const serviceID = uuidv4()
             <Controller
               control={control}
               name="qty"
-              defaultValue='10'
               render={({field: {onChange, value}}) => (
                 <TextInput
                   style={styles.counter}

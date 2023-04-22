@@ -4,11 +4,12 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 type Props = {
   onPress: Function;
+  WebView : Function;
 };
 
-const FooterBtn = (props: Props) => {
+const FooterBtnEdit = (props: Props) => {
   return (
-    
+    <>
     <View style={styles.containerBtn}>
       {/* Your main content here */}
       <TouchableOpacity style={styles.button} onPress={() => props.onPress()}>
@@ -24,11 +25,27 @@ const FooterBtn = (props: Props) => {
         </View>
       </TouchableOpacity>
     </View>
+    <View style={styles.containerBtn}>
+      {/* Your main content here */}
+      <TouchableOpacity style={styles.button} onPress={() => props.WebView()}>
+        <View style={styles.header}>
+          <Text style={styles.buttonText}>webView</Text>
+
+          <Icon
+            style={styles.icon}
+            name="arrow-right-thin"
+            size={28}
+            color="#19232e"
+          />
+        </View>
+      </TouchableOpacity>
+    </View>
+    </>
     
   );
 };
 
-export default FooterBtn;
+export default FooterBtnEdit;
 
 const styles = StyleSheet.create({
   containerBtn: {

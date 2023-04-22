@@ -12,6 +12,8 @@ import axios, {AxiosResponse, AxiosError} from 'axios';
 import auth, {FirebaseAuthTypes} from '@react-native-firebase/auth';
 import {HOST_URL} from '@env';
 import {v4 as uuidv4} from 'uuid';
+import ContractCard from '../components/ContractCard';
+import ContractDepositCard from '../components/ContractDepositCard';
 
 type Props = {
   navigation: StackNavigationProp<ParamListBase, 'SelectContract'>;
@@ -34,7 +36,7 @@ interface MyError {
 const contracts: Contract[] = [
   {
     id: 1,
-    number:101,
+    number: 101,
     title: 'Con 1',
     description: 'This is the description of Audit 1',
     price: 300,
@@ -42,7 +44,7 @@ const contracts: Contract[] = [
   },
   {
     id: 2,
-    number:102,
+    number: 102,
     title: 'Audit 2',
     description: 'This is the description of Audit 2',
     price: 250,
@@ -50,7 +52,7 @@ const contracts: Contract[] = [
   },
   {
     id: 3,
-    number:103,
+    number: 103,
     title: 'Audit 3',
     description: 'This is the description of Audit 3',
     price: 350,
@@ -58,16 +60,11 @@ const contracts: Contract[] = [
   },
 ];
 
-const createContract = async ({ data, isEmulator }: { data: any, isEmulator: boolean }) => {
+const contractCard = async (data: any) => {
   const user = auth().currentUser;
-  let url;
-  if (isEmulator) {
-    url = `http://${HOST_URL}:5001/workerfirebase-f1005/asia-southeast1/createContractAndQuotation`;
-  } else {
-    url = `https://asia-southeast1-workerfirebase-f1005.cloudfunctions.net/createContractAndQuotation`;
-  }
+
   const response = await fetch(
-    url,
+    `http://${HOST_URL}:5001/workerfirebase-f1005/asia-southeast1/createContractAndQuotation`,
     {
       method: 'POST',
       headers: {
@@ -82,15 +79,15 @@ const createContract = async ({ data, isEmulator }: { data: any, isEmulator: boo
   }
 };
 
-const SelectContract = ({navigation}: Props) => {
+const SelectContract = () => {
   const [selectedContracts, setSelectedContracts] = useState<Contract[]>([]);
   const {
-    state: {selectedContract,isEmulator},
+    state: {selectedContract},
     dispatch,
   }: any = useContext(Store);
   const route = useRoute();
 
-  const {updatedData, contract}: any = route.params;
+  //   const {updatedData, contract}: any = route.params;
   const [isLoadingMutation, setIsLoadingMutation] = useState(false);
 
   const handleSelectContract = (contract: Contract) => {
@@ -108,63 +105,62 @@ const SelectContract = ({navigation}: Props) => {
       setSelectedContracts([...selectedContracts, contract]);
       dispatch(stateAction.selected_contract(contract));
     }
-
   };
 
-  const {mutate} = useMutation(createContract, {
-    onSuccess: data => {
-      const newId = updatedData.data.id.slice(0, 8);
-      navigation.navigate('WebViewScreen', {newId});
-    },
-    onError: (error: MyError) => {
-      console.error('There was a problem calling the function:', error);
-      console.log(error.response);
-    },
-  });
+  //   const {mutate} = useMutation(contractCard, {
+  //     onSuccess: data => {
+  //       const newId = updatedData.data.id.slice(0, 8);
+  //       navigation.navigate('WebViewScreen', {newId});
+  //     },
+  //     onError: (error: MyError) => {
+  //       console.error('There was a problem calling the function:', error);
+  //       console.log(error.response);
+  //     },
+  //   });
 
-  const handleDonePress = async () => {
-    if (selectedContracts.length > 0) {
-      setIsLoadingMutation(true);
-      try {
-        const apiData = {
-          data: {
-            id: uuidv4(),
-            quotationId: updatedData.data.id,
-            signDate: 'preview',
-            signDateStamp: 11,
-            deposit: 2,
-            signAddress: contract.signAddress,
-            adjustPerDay: Number(contract.adjustPerDay),
-            installingDay: Number(contract.installingDay),
-            warantyYear: Number(contract.warantyYear),
-            prepareDay: Number(contract.prepareDay),
-            servayDate: contract.servayDate,
-            // servayDateStamp: new Date().getTime(),
-            quotationPageQty: 1,
-            workCheckDay: Number(contract.workCheckDay),
-            workCheckEnd: contract.workCheckEnd,
-            warantyTimeWork: contract.warantyTimeWork,
-            workAfterGetDeposit: contract.workAfterGetDeposit,
-            sellerId : updatedData.data.userId,
-            finishedDay: Number(contract.finishedDay),
-            offerContract: 'preview',
-            selectedContract: selectedContracts,
-            offerCheck: 'preview',
-            projectName: contract.projectName,
-          },
-          quotation:updatedData.data
-        };
+  //   const handleDonePress = async () => {
+  //     if (selectedContracts.length > 0) {
+  //       setIsLoadingMutation(true);
+  //       try {
+  //         const apiData = {
+  //           data: {
+  //             id: uuidv4(),
+  //             quotationId: updatedData.data.id,
+  //             signDate: 'preview',
+  //             signDateStamp: 11,
+  //             deposit: 2,
+  //             signAddress: contract.signAddress,
+  //             adjustPerDay: Number(contract.adjustPerDay),
+  //             installingDay: Number(contract.installingDay),
+  //             warantyYear: Number(contract.warantyYear),
+  //             prepareDay: Number(contract.prepareDay),
+  //             servayDate: contract.servayDate,
+  //             // servayDateStamp: new Date().getTime(),
+  //             quotationPageQty: 1,
+  //             workCheckDay: Number(contract.workCheckDay),
+  //             workCheckEnd: contract.workCheckEnd,
+  //             warantyTimeWork: contract.warantyTimeWork,
+  //             workAfterGetDeposit: contract.workAfterGetDeposit,
+  //             sellerId : updatedData.data.userId,
+  //             finishedDay: Number(contract.finishedDay),
+  //             offerContract: 'preview',
+  //             selectedContract: selectedContracts,
+  //             offerCheck: 'preview',
+  //             projectName: contract.projectName,
+  //           },
+  //           quotation:updatedData.data
+  //         };
 
-        // console.log('api data',JSON.stringify(apiData));
-        await mutate({ data: apiData, isEmulator });
+  //         // console.log('api data',JSON.stringify(apiData));
+  //         await mutate(apiData);
 
-        setIsLoadingMutation(false);
-      } catch (error: Error | AxiosError | any) {
-        console.error('There was a problem calling the function:', error);
-        console.log(error.response);
-      }
-    }
-  };
+  //         setIsLoadingMutation(false);
+  //       } catch (error: Error | AxiosError | any) {
+  //         console.error('There was a problem calling the function:', error);
+  //         console.log(error.response);
+  //       }
+  //     }
+  //   };
 
   useEffect(() => {
     if (selectedContract.length > 0) {
@@ -178,9 +174,6 @@ const SelectContract = ({navigation}: Props) => {
     defaultChecked: selectedContracts.some(a => a.id === contract.id),
   }));
 
-  console.log('selectedDataContracts', JSON.stringify(updatedData))
-  console.log('contract contract contract', JSON.stringify(updatedData.data.userId))
-
   return (
     <View style={{flex: 1}}>
       <ScrollView style={styles.container}>
@@ -190,30 +183,64 @@ const SelectContract = ({navigation}: Props) => {
           </View>
 
           <View style={styles.contractListContainer}>
-            {contractsWithChecked.map((contract, index) => (
-              <CardAudit
-                key={index}
-                title={contract.title}
-                description={contract.description}
-                price={contract.price}
-                defaultChecked={contract.defaultChecked}
-                imageUri={contract.imageUri}
-                onPress={() => handleSelectContract(contract)}
-              />
-            ))}
+            <ContractCard />
+          </View>
+          <View style={styles.contractListContainer}>
+            <ContractDepositCard
+              quotation={{
+                id: 'c2d26ac3-89e7-429b-854e-146e8e4608be',
+                vat7: '0',
+                taxName: 'vat3',
+                taxValue: '0',
+                summary: '19800',
+                summaryAfterDiscount: '19800',
+                discountName: 'percent',
+                discountValue: '0',
+                allTotal: '19800',
+                dateOffer: '2023-03-23',
+                dateEnd: '2023-03-30',
+                docNumber: '20230323768',
+                sellerSignature: 'none',
+                customerSignature: 'none',
+                customerDateSign: 'none',
+                status: 'pending',
+                sellerId: '6388420b-133e-4ec2-a1fe-9eec81abd4b2',
+                customerId: '5fbaee5b-fcf5-42f9-9203-10d6d873a182',
+                contractId: 'a494a0fd-f8da-4cd6-85f7-5140a335a17d',
+                walletTransactionId: null,
+                periodPercent: [
+                  {
+                    amount: 18000,
+                    details: 'จ่ายมัดจำ',
+                    percentage: 60,
+                    installment: 1,
+                  },
+                  {
+                    amount: 6000,
+                    details: 'ติดตั้งงานงวดที่ 1',
+                    percentage: 20,
+                    installment: 2,
+                  },
+                  {
+                    amount: 6000,
+                    details: 'ติดตั้งงานงวดที่ 2',
+                    percentage: 20,
+                    installment: 3,
+                  },
+                ],
+                periodTHB: [],
+                created: '2023-03-23T10:01:27.497Z',
+                updated: '2023-03-23T10:01:27.497Z',
+              }}
+            />
           </View>
         </View>
       </ScrollView>
-      {selectedContracts.length > 0 && (
-        <View style={styles.containerBtn}>
-          <TouchableOpacity onPress={handleDonePress} style={styles.button}>
-            <Text
-              style={
-                styles.buttonText
-              }>{`สร้างเอกสาร + (${selectedContracts.length})สัญญา`}</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+      <View style={styles.containerBtn}>
+        <TouchableOpacity style={styles.button}>
+          <Text style={styles.buttonText}>{`สร้างเอกสาร + สัญญา`}</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };

@@ -29,6 +29,8 @@ export const OFFERCHECK = 'OFFERCHECK';
 export const SIGN_DATE_STAMP = 'SIGN_DATE_STAMP';
 export const SERVAY_DATE_STAMP = 'SERVAY_DATE_STAMP';
 export const PROJECT_NAME = 'PROJECT_NAME';
+export const IS_EMULATOR = 'IS_EMULATOR';
+
 
 //AddClient
 export const CLIENT_NAME = 'CLIENT_NAME';

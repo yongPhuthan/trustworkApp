@@ -94,7 +94,7 @@ const AddClientForm = ({navigation, route}: Props) => {
 
         <Controller
           control={control}
-          rules={{required: true}}
+       
           render={({field: {onChange, onBlur, value}}) => (
             <TextInput
               placeholder="เบอร์โทรศัพท์"
@@ -107,7 +107,7 @@ const AddClientForm = ({navigation, route}: Props) => {
           )}
           name="phone"
         />
-        {errors.phone && <Text>This is required.</Text>}
+        {/* {errors.phone && <Text>This is required.</Text>} */}
 
         <Controller
           control={control}

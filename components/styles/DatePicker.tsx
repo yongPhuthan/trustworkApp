@@ -94,7 +94,6 @@ const styles = StyleSheet.create({
     padding: 10,
     alignItems: 'center',
     marginBottom:100
-
   },
   modalButtonLabel: {
     color: '#fff',

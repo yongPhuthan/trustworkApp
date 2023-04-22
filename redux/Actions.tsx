@@ -11,6 +11,10 @@ export const all_total = (payload: number) => ({
   type: contrains.ALLTOTAL,
   payload,
 });
+export const is_emulator = (payload: boolean) => ({
+  type: contrains.IS_EMULATOR,
+  payload,
+});
 
 export const doc_counter = (payload: number) => ({
   type: contrains.DOC_COUNTER,
@@ -53,7 +57,7 @@ export const deposit_type = (payload: string) => ({
   payload,
 });
 
-export const period_percent = (payload: string[]) => ({
+export const period_percent = (payload: object[]) => ({
   type: contrains.PERIOD_PERCENT,
   payload,
 });
@@ -233,7 +237,7 @@ export const depositType = (payload: string) => {
   };
 };
 
-export const periodPercent = (payload: string[]) => {
+export const periodPercent = (payload: object[]) => {
   return (dispatch: any) => {
     dispatch(period_percent(payload));
   };
@@ -375,6 +379,13 @@ export const removeSelectedContract = (payload: object) => {
 
 export const resetContract = () => {
   return (dispatch: any) => {
-    dispatch(reset_contract);
+    dispatch(reset_contract());
+  };
+};
+
+
+export const isEmulator = (payload: boolean) => {
+  return (dispatch: any) => {
+    dispatch(is_emulator(payload));
   };
 };
